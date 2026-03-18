@@ -1,9 +1,9 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Crate : MonoBehaviour
 {
-    public float jumpImpulse;
-    public BoxCollider trigger;
+    public BounceOn bounceOn;
     public BoxCollider coll;
     public Animation anim;
     [Range(0f, 1f)]
@@ -14,24 +14,15 @@ public class Crate : MonoBehaviour
 
     private void Awake()
     {
-        trigger.isTrigger = true;
         broken = false;
-    }
-    private void FixedUpdate()
-    {
-        if ((coll.bounds.max.y - Player.Instance.coll.bounds.min.y) <= 0.01f  && 
-            Player.Instance.VerticalVelocity < 1f && 
-            trigger.bounds.Intersects(Player.Instance.coll.bounds))
-        {
-            BreakCrate();
-        }
+        bounceOn.OnBounce += b => BreakCrate();
     }
     void BreakCrate ()
     {
         if (broken) return;
 
+        bounceOn.enabled = false;
         coll.enabled = false;
-        Player.Instance.Jump(jumpImpulse, true);
         anim.Play();
 
         if (Random.value <= dropChance && drop.Length > 0) 

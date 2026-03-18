@@ -228,6 +228,7 @@ GameObject:
   - component: {fileID: 5822927283177017537}
   - component: {fileID: 8354775409320916361}
   - component: {fileID: 853321580472432279}
+  - component: {fileID: 6338885815797820677}
   m_Layer: 0
   m_Name: Crate
   m_TagString: Dynamic
@@ -264,8 +265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9e9f3dbd0f1b1b47b03ac4fd5ba0af6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crate
-  jumpImpulse: 12
-  trigger: {fileID: 6884835115668877403}
+  bounceOn: {fileID: 6338885815797820677}
   coll: {fileID: 853321580472432279}
   anim: {fileID: 5216761398687101111}
   dropChance: 0.5
@@ -291,6 +291,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.54, y: 0.54, z: 0.54}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6338885815797820677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2631156958094775029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64ce30ae37a12745addd5372df3855e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BounceOn
+  jumpImpulse: 12
+  trigger: {fileID: 6884835115668877403}
+  anim: {fileID: 0}
 --- !u!1 &3518787781244065017
 GameObject:
   m_ObjectHideFlags: 0

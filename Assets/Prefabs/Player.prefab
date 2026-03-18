@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 3888491272801057004}
   - component: {fileID: 6429181856089979748}
   - component: {fileID: 4091046781058161331}
+  - component: {fileID: 5288596223146404265}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -225,6 +226,7 @@ MonoBehaviour:
   jumpImpulse: 13.5
   upwardsGravity: -24
   downwardsGravity: -28
+  physicsTracker: {fileID: 5288596223146404265}
   vfGetCoin: {fileID: 1000083343304804895}
   meshPlayer: {fileID: 989401040380846390}
   meshPlayerHead: {fileID: 8624859570745300114}
@@ -249,6 +251,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInput
   inputEnabled: 1
+--- !u!114 &5288596223146404265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5259753470061312935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 892fac5dae3cdd94fbea98b4c857f9e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PhysicsTracker
+  TrackedCollider: {fileID: 1456306069388393285}
+  TrackedRigidBody: {fileID: 3888491272801057004}
 --- !u!1 &5838037083722069140
 GameObject:
   m_ObjectHideFlags: 0

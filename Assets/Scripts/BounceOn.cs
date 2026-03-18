@@ -4,15 +4,15 @@ public class BounceOn : MonoBehaviour
 {
     public float jumpImpulse;
     public BoxCollider trigger;
-    public BoxCollider coll;
     public Animation anim;
 
     public event System.Action<BounceOn> OnBounce;
     private void FixedUpdate()
     {
-        if ((coll.bounds.max.y - Player.Instance.coll.bounds.min.y) <= 0.01f &&
-            Player.Instance.VerticalVelocity < 1f &&
-            trigger.bounds.Intersects(Player.Instance.coll.bounds))
+        if (trigger.bounds.Intersects(Player.Instance.coll.bounds) &&//Is now intersecting?
+            !Player.Instance.IsGrounded && //Is airborne
+            Player.Instance.VerticalVelocity < 1f && //Is kinda falling?
+            (Player.Instance.MaxAirBounds.Value.min.y - trigger.bounds.max.y) > -0.1f) //Was on top at some previous frame? 
         {
             Bounce();
         }
@@ -21,7 +21,9 @@ public class BounceOn : MonoBehaviour
     public void Bounce ()
     {
         Player.Instance.Jump(jumpImpulse, true);
-        anim?.Play();
+
+        if (anim != null)
+            anim.Play();
 
         OnBounce?.Invoke(this);
     }

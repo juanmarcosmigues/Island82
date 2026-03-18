@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -9,6 +10,7 @@ public class Player : MonoBehaviour
     public float upwardsGravity;
     public float downwardsGravity;
 
+    public PhysicsTracker physicsTracker;
     public VisualFeedback vfGetCoin;
     public GameObject meshPlayer;
     public GameObject meshPlayerHead;
@@ -21,6 +23,7 @@ public class Player : MonoBehaviour
 
     public event System.Action<int> OnPickUpCoin;
     public event System.Action OnGroundedStart;
+    public Bounds? MaxAirBounds { get; private set; }
     public float VerticalVelocity {  get; private set; }
     public bool IsGrounded {  get; private set; }
 
@@ -165,6 +168,19 @@ public class Player : MonoBehaviour
 
         body.linearVelocity = velocity;
         lastVelocity = velocity;
+
+        if (grounded)
+        {
+            MaxAirBounds = null;
+        }
+        else
+        {
+            if (!MaxAirBounds.HasValue)
+                MaxAirBounds = coll.bounds;
+
+            MaxAirBounds = coll.bounds.center.y > MaxAirBounds.Value.center.y 
+                ? coll.bounds : MaxAirBounds.Value;
+        }
     }
     private (bool, Vector3) CheckGrounded ()
     {

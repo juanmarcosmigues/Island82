@@ -40,7 +40,7 @@ public class EnemyTurret : MonoBehaviour
     }
     IEnumerator DieAnimation()
     {
-        yield return new WaitForSeconds(0.12f);
+        yield return new WaitForSeconds(0.08f);
         destroyedParts.SetParent(null);
         destroyedParts.gameObject.SetActive(true);
         PoolManager.Instance.GetPool<VFXPool>("VFXDustExplosionFlat").GetObject().transform.position = transform.position;
