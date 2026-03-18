@@ -2,6 +2,7 @@ Shader "Aftersun/Vertex Color"
 {
     Properties
     {
+        _OverrideColor ("Override Color", Color) = (0,0,0,0)
     }
     SubShader
     {
@@ -34,6 +35,8 @@ Shader "Aftersun/Vertex Color"
                 float4 vertex : SV_POSITION;
             };
 
+            float4 _OverrideColor;
+
             v2f vert (appdata v)
             {
                 v2f o;
@@ -50,7 +53,7 @@ Shader "Aftersun/Vertex Color"
                 // sample the texture
                 fixed4 col = (1,1,1,1);
                 float3 vertCol = GAMMA_CORRECTION(i.col);
-                col.xyz = vertCol;
+                col.xyz = lerp(vertCol, _OverrideColor, _OverrideColor.a);
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

@@ -6,6 +6,9 @@ public class Crate : MonoBehaviour
     public BoxCollider trigger;
     public BoxCollider coll;
     public Animation anim;
+    [Range(0f, 1f)]
+    public float dropChance;
+    public string drop;
 
     bool broken;
 
@@ -30,6 +33,11 @@ public class Crate : MonoBehaviour
         coll.enabled = false;
         Player.Instance.Jump(jumpImpulse, true);
         anim.Play();
+
+        if (Random.value <= dropChance && drop.Length > 0) 
+        {
+            PoolManager.Instance.GetPool<ObjectPool>(drop).GetObject().transform.position = transform.position;
+        }
 
         broken = true;
 

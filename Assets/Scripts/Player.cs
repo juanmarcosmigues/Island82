@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     public float upwardsGravity;
     public float downwardsGravity;
 
+    public VisualFeedback vfGetCoin;
     public GameObject meshPlayer;
     public GameObject meshPlayerHead;
     public Transform renderRoot;
@@ -92,6 +93,10 @@ public class Player : MonoBehaviour
         lookDirection = dir;
         if (val > 0.1f) Move(dir, val);
         else Move(dir, 0f);
+    }
+    public void GetCoin ()
+    {
+        vfGetCoin.Play();
     }
     public void InsideObject (bool inside)
     {

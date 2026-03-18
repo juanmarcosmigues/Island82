@@ -268,6 +268,8 @@ MonoBehaviour:
   trigger: {fileID: 6884835115668877403}
   coll: {fileID: 853321580472432279}
   anim: {fileID: 5216761398687101111}
+  dropChance: 0.5
+  drop: CoinDropX3
 --- !u!65 &853321580472432279
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -340,8 +342,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.56, y: 0.63, z: 0.56}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.57, y: 0.6535328, z: 0.57}
+  m_Center: {x: 0, y: 0.011766404, z: 0}
 --- !u!1 &3537977293530029205
 GameObject:
   m_ObjectHideFlags: 0

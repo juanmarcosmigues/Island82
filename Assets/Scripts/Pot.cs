@@ -10,6 +10,9 @@ public class Pot : MonoBehaviour
     public BoxCollider coll;
     public Animation anim;
     public Vector3 parentOffset;
+    [Range(0f, 1f)]
+    public float dropChance;
+    public string drop;
 
     int life;
     Timestamp timer;
@@ -57,6 +60,11 @@ public class Pot : MonoBehaviour
             transform.SetParent(null);
 
             Player.Instance.OnGroundedStart -= Land;
+
+            if (Random.value <= dropChance && drop.Length > 0)
+            {
+                PoolManager.Instance.GetPool<ObjectPool>(drop).GetObject().transform.position = transform.position;
+            }
         }
         else
         {
