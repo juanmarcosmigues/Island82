@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     public Rigidbody body;
     public LayerMask groundMask;
 
+    public event System.Action<int> OnPickUpCoin;
     public event System.Action OnGroundedStart;
     public float VerticalVelocity {  get; private set; }
     public bool IsGrounded {  get; private set; }
@@ -97,6 +98,7 @@ public class Player : MonoBehaviour
     public void GetCoin ()
     {
         vfGetCoin.Play();
+        OnPickUpCoin?.Invoke(1);
     }
     public void InsideObject (bool inside)
     {
