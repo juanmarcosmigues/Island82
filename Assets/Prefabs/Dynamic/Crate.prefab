@@ -229,7 +229,9 @@ GameObject:
   - component: {fileID: 8354775409320916361}
   - component: {fileID: 853321580472432279}
   - component: {fileID: 6338885815797820677}
-  m_Layer: 0
+  - component: {fileID: 5084705276664470718}
+  - component: {fileID: 4747240802054910114}
+  m_Layer: 8
   m_Name: Crate
   m_TagString: Dynamic
   m_Icon: {fileID: 0}
@@ -268,6 +270,7 @@ MonoBehaviour:
   bounceOn: {fileID: 6338885815797820677}
   coll: {fileID: 853321580472432279}
   anim: {fileID: 5216761398687101111}
+  combatHandler: {fileID: 4747240802054910114}
   dropChance: 0.5
   drop: CoinDropX3
 --- !u!65 &853321580472432279
@@ -306,6 +309,33 @@ MonoBehaviour:
   jumpImpulse: 12
   trigger: {fileID: 6884835115668877403}
   anim: {fileID: 0}
+  vfb: {fileID: 0}
+--- !u!114 &5084705276664470718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2631156958094775029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cd057eab3b3ac746bdb438be39fd97c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Entity
+  type: 2
+  customTag: Crate
+--- !u!114 &4747240802054910114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2631156958094775029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc35f953bafeed4bb28f9993694e6f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatHandler
 --- !u!1 &3518787781244065017
 GameObject:
   m_ObjectHideFlags: 0
@@ -316,7 +346,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5382571312809079960}
   - component: {fileID: 6884835115668877403}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Trigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}

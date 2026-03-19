@@ -275,7 +275,7 @@ GameObject:
   - component: {fileID: 1283172986230269230}
   - component: {fileID: 6227261432457243183}
   - component: {fileID: 7009979794863583977}
-  m_Layer: 7
+  m_Layer: 9
   m_Name: Coin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -313,6 +313,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Coin
   magneticRadius: 1.3
   renderRoot: {fileID: 7930491179054066032}
+  fromDrop: 0
 --- !u!114 &1283172986230269230
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,7 +12,9 @@ GameObject:
   - component: {fileID: 523962807611657501}
   - component: {fileID: 8571570881012183995}
   - component: {fileID: 8490063416392476019}
-  m_Layer: 0
+  - component: {fileID: 7468974574421117687}
+  - component: {fileID: 3710314721970111186}
+  m_Layer: 8
   m_Name: Pot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -82,6 +84,7 @@ MonoBehaviour:
   trigger: {fileID: 759366152975184034}
   coll: {fileID: 523962807611657501}
   anim: {fileID: 36151557565246836}
+  combatHandler: {fileID: 3710314721970111186}
   parentOffset: {x: 0, y: 0, z: 0}
   dropChance: 1
   drop: CoinDropX6
@@ -103,6 +106,32 @@ MonoBehaviour:
   shadowMask:
     serializedVersion: 2
     m_Bits: 65
+--- !u!114 &7468974574421117687
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 742385923677317176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cd057eab3b3ac746bdb438be39fd97c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Entity
+  type: 2
+  customTag: Pot
+--- !u!114 &3710314721970111186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 742385923677317176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc35f953bafeed4bb28f9993694e6f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CombatHandler
 --- !u!1 &1088478938178796426
 GameObject:
   m_ObjectHideFlags: 0
@@ -10270,7 +10299,7 @@ GameObject:
   - component: {fileID: 8822289753665637760}
   - component: {fileID: 4597748841111516915}
   - component: {fileID: 759366152975184034}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Trigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10380,6 +10409,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 664202242051629891}
     m_Modifications:
     - target: {fileID: 298885166772373849, guid: 01a4314ccb7a1a049bda4d40065d6235, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.67473185
+      objectReference: {fileID: 0}
+    - target: {fileID: 298885166772373849, guid: 01a4314ccb7a1a049bda4d40065d6235, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.67473185
+      objectReference: {fileID: 0}
+    - target: {fileID: 298885166772373849, guid: 01a4314ccb7a1a049bda4d40065d6235, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.67473185
+      objectReference: {fileID: 0}
+    - target: {fileID: 298885166772373849, guid: 01a4314ccb7a1a049bda4d40065d6235, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -10445,11 +10486,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4035546785271668780, guid: 01a4314ccb7a1a049bda4d40065d6235, type: 3}
       propertyPath: InitialModule.startSize.scalar
-      value: 1.3
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 4035546785271668780, guid: 01a4314ccb7a1a049bda4d40065d6235, type: 3}
       propertyPath: InitialModule.startSize.minScalar
-      value: 0.7
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 4035546785271668780, guid: 01a4314ccb7a1a049bda4d40065d6235, type: 3}
       propertyPath: InitialModule.startLifetime.scalar

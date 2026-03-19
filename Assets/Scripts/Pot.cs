@@ -1,4 +1,5 @@
 using UnityEngine;
+using static CombatHandler;
 
 public class Pot : MonoBehaviour
 {
@@ -9,11 +10,13 @@ public class Pot : MonoBehaviour
     public BoxCollider trigger;
     public BoxCollider coll;
     public Animation anim;
+    public CombatHandler combatHandler;
     public Vector3 parentOffset;
     [Range(0f, 1f)]
     public float dropChance;
     public string drop;
 
+    bool playerInside;
     int life;
     Timestamp timer;
 
@@ -21,9 +24,12 @@ public class Pot : MonoBehaviour
     {
         trigger.isTrigger = true;
         life = meshes.Length;
+        combatHandler.OnGetHit += GetHit;
     }
     private void FixedUpdate()
     {
+        if (playerInside) return;
+
         if ((coll.bounds.max.y - Player.Instance.coll.bounds.min.y) <= 0.01f  && 
             Player.Instance.VerticalVelocity < 1f && 
             trigger.bounds.Intersects(Player.Instance.coll.bounds))
@@ -43,6 +49,7 @@ public class Pot : MonoBehaviour
         Player.Instance.OnGroundedStart += Land;
 
         enabled = false;
+        playerInside = true;
     }
 
     void Land ()
@@ -52,19 +59,7 @@ public class Pot : MonoBehaviour
         life--;
         if (life <= 0 )
         {
-            Player.Instance.InsideObject(false);
-
-            vfxParts.transform.SetParent(null);
-            vfxParts.gameObject.SetActive(true);
-            gameObject.SetActive(false);
-            transform.SetParent(null);
-
-            Player.Instance.OnGroundedStart -= Land;
-
-            if (Random.value <= dropChance && drop.Length > 0)
-            {
-                PoolManager.Instance.GetPool<ObjectPool>(drop).GetObject().transform.position = transform.position;
-            }
+            Break();
         }
         else
         {
@@ -72,5 +67,29 @@ public class Pot : MonoBehaviour
             breakParticles.Play();
             anim.Play();
         }
+    }
+    void Break ()
+    {
+        if (playerInside)
+        {
+            Player.Instance.InsideObject(false);
+            Player.Instance.OnGroundedStart -= Land;
+            transform.SetParent(null);
+
+            playerInside = false;
+        }
+
+        vfxParts.transform.SetParent(null);
+        vfxParts.gameObject.SetActive(true);
+        gameObject.SetActive(false);
+              
+        if (Random.value <= dropChance && drop.Length > 0)
+        {
+            PoolManager.Instance.GetPool<ObjectPool>(drop).GetObject().transform.position = transform.position;
+        }
+    }
+    void GetHit(GameObject source, int damage, Weight weight, string tag)
+    {
+        Break();
     }
 }

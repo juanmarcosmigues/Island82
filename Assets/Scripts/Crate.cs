@@ -1,11 +1,13 @@
 using Unity.VisualScripting;
 using UnityEngine;
+using static CombatHandler;
 
 public class Crate : MonoBehaviour
 {
     public BounceOn bounceOn;
     public BoxCollider coll;
     public Animation anim;
+    public CombatHandler combatHandler;
     [Range(0f, 1f)]
     public float dropChance;
     public string drop;
@@ -16,12 +18,14 @@ public class Crate : MonoBehaviour
     {
         broken = false;
         bounceOn.OnBounce += b => BreakCrate();
+        combatHandler.OnGetHit += GetHit;
     }
     void BreakCrate ()
     {
         if (broken) return;
 
         bounceOn.enabled = false;
+        bounceOn.trigger.enabled = false;
         coll.enabled = false;
         anim.Play();
 
@@ -33,5 +37,9 @@ public class Crate : MonoBehaviour
         broken = true;
 
         enabled = false;
+    }
+    void GetHit(GameObject source, int damage, Weight weight, string tag)
+    {
+        BreakCrate();
     }
 }

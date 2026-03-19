@@ -5,6 +5,7 @@ public class BounceOn : MonoBehaviour
     public float jumpImpulse;
     public BoxCollider trigger;
     public Animation anim;
+    public VisualFeedback vfb;
 
     public event System.Action<BounceOn> OnBounce;
     private void FixedUpdate()
@@ -24,6 +25,8 @@ public class BounceOn : MonoBehaviour
 
         if (anim != null)
             anim.Play();
+        if (vfb != null)
+            vfb.Play();
 
         OnBounce?.Invoke(this);
     }
