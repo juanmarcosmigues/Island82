@@ -5294,6 +5294,7 @@ MonoBehaviour:
   trackSpeed: 1
   life: 3
   hitbox: {fileID: 5404283592715508555}
+  hurtbox: {fileID: 4415363503371932035}
   vfxDustTrail: {fileID: 3457235626018151464}
 --- !u!114 &3754656849574108221
 MonoBehaviour:

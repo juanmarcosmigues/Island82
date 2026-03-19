@@ -1161,7 +1161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3aff943a4cb00ff45ae6c595f96b4d73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RigidbodyRadialExplosion
-  force: 4
+  force: 3
   torque: 5
 --- !u!1 &6977793017811546523
 GameObject:

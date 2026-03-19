@@ -1,4 +1,5 @@
 using System.Collections;
+using UnityEditor;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -8,6 +9,7 @@ public class Bullet : MonoBehaviour
     public float trackSpeed;
     public int life = 3;
     public TriggerEventHandler hitbox;
+    public BoxCollider hurtbox;
     public ParticleSystem vfxDustTrail;
 
     private Entity me;
@@ -47,7 +49,8 @@ public class Bullet : MonoBehaviour
         currentLife = life;
         hitPlayerCoroutine = null;
 
-        hitbox.enabled = true;
+        hitbox.gameObject.SetActive(true);
+        hurtbox.gameObject.SetActive(true);
         bounceOn.enabled = true;
         rb.useGravity = false;
         rb.linearVelocity = Vector3.zero;
@@ -96,6 +99,7 @@ public class Bullet : MonoBehaviour
     }
     private IEnumerator HitPlayerEvaluation ()
     {
+        if (Player.Instance.Invulnerable) yield break;
         yield return new WaitForFixedUpdate();
         if (bouncedTimer.remainingTime > 0) yield break; //Wait a frame and favour bounce instead of hit
 
@@ -111,7 +115,8 @@ public class Bullet : MonoBehaviour
         currentLife = 0;
 
         vfxDustTrail.Stop();
-        hitbox.enabled = false;
+        hitbox.gameObject.SetActive(false);
+        hurtbox.gameObject.SetActive(false);
         bounceOn.enabled = false;
         rb.useGravity = true;
         rb.linearVelocity = Vector3.up * 3f;

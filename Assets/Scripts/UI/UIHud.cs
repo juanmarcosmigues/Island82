@@ -6,12 +6,14 @@ public class UIHud : MonoBehaviour
 {
     public TextMeshProUGUI tmpClock;
     public TextMeshProUGUI tmpCoins;
+    public GameObject[] lifePoints;
     private int hours, minutes, seconds;
     private string clockDots = ":";
 
     private void Start()
     {
         GameplayManager.Instance.OnAddCoins += AddCoins;
+        Player.Instance.OnGetHurt += PlayerHurt;
     }
     private void Update()
     {
@@ -29,5 +31,10 @@ public class UIHud : MonoBehaviour
     private void AddCoins (int amount)
     {
         tmpCoins.text = GameplayManager.Instance.playerCurrency.ToString("000");
+    }
+    private void PlayerHurt(int damage) 
+    {
+        for (int i = 0; i < lifePoints.Length; i++)
+            lifePoints[i].SetActive(i < Player.Instance.CurrentLife);
     }
 }

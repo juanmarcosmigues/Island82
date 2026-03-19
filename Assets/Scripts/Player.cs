@@ -1,27 +1,45 @@
+using System.Collections;
 using UnityEngine;
+using static CombatHandler;
 
 public class Player : MonoBehaviour
 {
+    private const float TIME_INVULNERABLE = 3f;
+    private const float SPEED_KNOCKBACK = 7f;
     public static Player Instance { get; private set; }
 
+    [Header("Physics")]
     public float moveSpeed;
     public float jumpImpulse;
     public float upwardsGravity;
     public float downwardsGravity;
+    public float drag;
+    public float airDrag;
+    public LayerMask groundMask;
 
-    public PhysicsTracker physicsTracker;
-    public VisualFeedback vfGetCoin;
+    [Header("References")]
     public GameObject meshPlayer;
     public GameObject meshPlayerHead;
+    public Transform directionRoot;
     public Transform renderRoot;
     public ParticleSystem dust;
-    public PlayerInput input;
-    public BoxCollider coll;
-    public Rigidbody body;
-    public LayerMask groundMask;
+    public VisualFeedback vfGetCoin;
+
+    [HideInInspector] public PlayerInput input;
+    [HideInInspector] public BoxCollider coll;
+    [HideInInspector] public Rigidbody rb;
+    [HideInInspector] public CombatHandler combatHandler;
 
     public event System.Action<int> OnPickUpCoin;
     public event System.Action OnGroundedStart;
+    public event System.Action<int> OnGetHurt;
+
+    public int CurrentLife { get; private set; } = 5;
+    public bool Invulnerable { get; private set; } = false;
+
+    Timestamp gotHitTimer;
+    Coroutine invulnerableBlinkCoroutine;
+
     public Bounds? MaxAirBounds { get; private set; }
     public float VerticalVelocity {  get; private set; }
     public bool IsGrounded {  get; private set; }
@@ -38,10 +56,16 @@ public class Player : MonoBehaviour
 
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
+    Vector3 horizontalVelocity;
 
     private void Awake()
     {
         Instance = this;
+
+        rb = GetComponent<Rigidbody>();
+        coll = GetComponent<BoxCollider>();
+        input = GetComponent<PlayerInput>();
+        combatHandler = GetComponent<CombatHandler>();
     }
     private void Start()
     {
@@ -57,6 +81,8 @@ public class Player : MonoBehaviour
         input.GetButton("ButtonSouth").onPressedDown += PressJump;
         input.GetButton("ButtonSouth").onRelease += ReleaseJump;
         input.onMovementAxisMove += MoveAxis;
+
+        combatHandler.OnGetHit += GetHit;
     }
     private void Update()
     {
@@ -64,6 +90,7 @@ public class Player : MonoBehaviour
         {
             PressJump();
         }
+
         if (lookDirection.sqrMagnitude > 0.01f)
         {
             Vector3 forward = Camera.main.RotateTowardsCamera(new Vector2(0f, 1f));
@@ -71,7 +98,15 @@ public class Player : MonoBehaviour
             float angle = Vector3.Angle(forward, lookDirection);
             float side = Mathf.Sign(Vector3.Dot(lookDirection, right));
             float saturatedAngle = Mathf.Round(angle / 45f) * 45f * side;
-            renderRoot.forward = Quaternion.AngleAxis(saturatedAngle, Vector3.up) * forward;
+            directionRoot.forward = Quaternion.AngleAxis(saturatedAngle, Vector3.up) * forward;
+        }
+
+        if (gotHitTimer.remainingTime < 0f && invulnerableBlinkCoroutine != null)
+        {
+            StopCoroutine(invulnerableBlinkCoroutine);
+            invulnerableBlinkCoroutine = null;
+            renderRoot.gameObject.SetActive(true);
+            Invulnerable = false;
         }
     }
 
@@ -154,18 +189,26 @@ public class Player : MonoBehaviour
         else 
             verticalVelocity += (lastVelocity.y < 1f ? downwardsGravity : upwardsGravity) * Vector3.up * Time.fixedDeltaTime;
         if (verticalVelocity.y <= 0f && grounded)
-            body.MovePosition(body.position + (ground.y - coll.bounds.min.y) * Vector3.up); //snap
+            rb.MovePosition(rb.position + (ground.y - coll.bounds.min.y) * Vector3.up); //snap
 
         if (grounded)
+        {
             moveVelocity = Vector3.zero;
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, drag * Time.fixedDeltaTime);
+        }
+        else
+        {
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, airDrag * Time.fixedDeltaTime);
+        }
 
         velocity += verticalVelocity;
         velocity += moveVelocity;
+        velocity += horizontalVelocity;
 
         IsGrounded = grounded;
         VerticalVelocity = verticalVelocity.y;
 
-        body.linearVelocity = velocity;
+        rb.linearVelocity = velocity;
         lastVelocity = velocity;
 
         if (grounded)
@@ -198,5 +241,23 @@ public class Player : MonoBehaviour
 
         return (false, Vector3.zero);
     }
+    void GetHit(GameObject source, int damage, Weight weight, string tag)
+    {
+        if (Invulnerable) { return; }
 
+        CurrentLife -= damage;
+        Invulnerable = true;
+        gotHitTimer.Set(TIME_INVULNERABLE);
+
+        invulnerableBlinkCoroutine = 
+            StartCoroutine(renderRoot.gameObject.Blink(0.05f, TIME_INVULNERABLE));
+
+        FrameFreeze.Freeze(0.3f, () =>
+        {
+            MainCameraShaker.instance.Shake(0.2f, 0.3f, 0.2f);
+            horizontalVelocity += (transform.position - source.transform.position).FlattenY().normalized * SPEED_KNOCKBACK;
+        });
+
+        OnGetHurt?.Invoke(damage);
+    }
 }
