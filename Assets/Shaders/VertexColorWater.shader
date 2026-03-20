@@ -1,10 +1,11 @@
-Shader "Aftersun/Vertex Color Water Shore"
+Shader "Aftersun/Vertex Color Water"
 {
     Properties
     {
         _OverrideColor ("Override Color", Color) = (0,0,0,0)
-        _Waves ("_Waves", Vector) = (0,0,0,0)
-        _BlendPoint ("Blend Point", Float) = 10
+        _LightChange ("Light Change", Float) = 3
+        _Waves ("Waves", Vector) = (0,0,0,0)
+        _Noise ("Noise", 2D) = "black" {}
     }
     SubShader
     {
@@ -35,43 +36,33 @@ Shader "Aftersun/Vertex Color Water Shore"
                 float4 col : COLOR;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
-                float4 vertexLocal : TEX0;
             };
 
             float4 _OverrideColor;
+            sampler2D _Noise;
             float4 _Waves;
-            float _BlendPoint;
+            float _LightChange;
 
-            // 4x4 Bayer matrix normalized to 0-1
-            static const float4x4 bayerMatrix = float4x4(
-                 0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
-                12.0/16.0,  4.0/16.0, 14.0/16.0,  6.0/16.0,
-                 3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
-                15.0/16.0,  7.0/16.0, 13.0/16.0,  5.0/16.0
-            );
-
-            float windVertexDisplacement (appdata v, float steps) 
+            float2 waterVertexDisplacement (float3 vertexWorldPos, float influence, float steps) 
             {
-                float phase = (v.vertex.y + 0.1) * 0.5 + v.vertex.x * 2; 
-
                 float steppedTime = floor(_Time.y / (1.0 / steps)) / steps;
+                float4 uv = float4((vertexWorldPos.x + steppedTime) * _Waves.w, (vertexWorldPos.z + steppedTime) * _Waves.w, 0, 0); 
+                fixed4 noise = tex2Dlod(_Noise, uv);
 
-                float sway1 = sin(steppedTime * _Waves.z + phase);               
-                float sway2 = sin(steppedTime * _Waves.z * 2.3 + phase * 1.7) * 0.5; 
-                float sway3 = sin(steppedTime * _Waves.z * 0.4 + phase * 0.6) * 0.3;
-
-                float sway = sway1 + sway2 + sway3;
-                float wind = _Waves.x * sway * _Waves.w * v.col.a;
-
-                return wind;
+                return float2((lerp(-1, 1, noise.r)  * _Waves.z + _Waves.x) * influence, (lerp(-1, 1, noise.g) * _Waves.z + _Waves.y) * influence);
             }
 
             v2f vert (appdata v)
             {
                 v2f o;
 
-                o.vertexLocal = v.vertex;
-                v.vertex.x += windVertexDisplacement(v, 8);
+                float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                float2 waves = waterVertexDisplacement(worldPos, 1-v.col.a, 8);
+
+                float3 worldDisp = float3(waves.x, 0, waves.y);
+                // Transform back to object space and apply
+                v.vertex.xyz += mul((float3x3)unity_WorldToObject, worldDisp);
+
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 
                 //o.vertex = VertexWiggle(v.vertex);
@@ -83,17 +74,12 @@ Shader "Aftersun/Vertex Color Water Shore"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // Screen-space dither
-                float2 screenPos = i.vertex.xy;
-                uint2 pixel = uint2(screenPos) % 4;
-                float threshold = bayerMatrix[pixel.x][pixel.y];
-
-                clip((i.vertexLocal.x + _BlendPoint) - threshold);
-
+                float steppedTime = floor(_Time.y / (1.0 / 8)) / 8;
                 // sample the texture
                 fixed4 col = (1,1,1,1);
                 float3 vertCol = GAMMA_CORRECTION(i.col);
-                col.xyz = lerp(vertCol, _OverrideColor, _OverrideColor.a);
+                float lightChange = sin(steppedTime);
+                col.xyz = lerp(vertCol, _OverrideColor, lerp(0, 0.5, lightChange));
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
