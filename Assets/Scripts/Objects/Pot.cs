@@ -88,7 +88,7 @@ public class Pot : MonoBehaviour
             PoolManager.Instance.GetPool<ObjectPool>(drop).GetObject().transform.position = transform.position;
         }
     }
-    void GetHit(GameObject source, int damage, Weight weight, string tag)
+    void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
     {
         Break();
     }

@@ -80,7 +80,7 @@ public class EnemyTurret : MonoBehaviour
 
         yield break;
     }
-    void GetHit(GameObject source, int damage, Weight weight, string tag)
+    void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
     {
         Die(false);
     }

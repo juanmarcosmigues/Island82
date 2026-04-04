@@ -38,7 +38,7 @@ public class Crate : MonoBehaviour
 
         enabled = false;
     }
-    void GetHit(GameObject source, int damage, Weight weight, string tag)
+    void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
     {
         BreakCrate();
     }

@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using static CombatHandler;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IDynamicObject
 {
     private const float TIME_INVULNERABLE = 3f;
     private const float SPEED_KNOCKBACK = 7f;
@@ -53,6 +53,7 @@ public class Player : MonoBehaviour
     bool grounded;
     Vector3 ground;
     float jumpValue;
+    Vector3 checkpoint;
 
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
@@ -175,6 +176,7 @@ public class Player : MonoBehaviour
         {
             if (newGrounded.found)
             {
+                checkpoint = transform.position;
                 OnGroundedStart?.Invoke();
                 dust.Play();
             }
@@ -241,7 +243,7 @@ public class Player : MonoBehaviour
 
         return (false, Vector3.zero);
     }
-    void GetHit(GameObject source, int damage, Weight weight, string tag)
+    void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
     {
         if (Invulnerable) { return; }
 
@@ -252,12 +254,28 @@ public class Player : MonoBehaviour
         invulnerableBlinkCoroutine = 
             StartCoroutine(renderRoot.gameObject.Blink(0.05f, TIME_INVULNERABLE));
 
+        float knockbackForce = SPEED_KNOCKBACK;
+        knockbackForce *= weight switch
+        {
+            Weight.Light => 0.3f,
+            Weight.Medium => 0.7f,
+            Weight.Heavy => 1f,
+            _ => 1.0f 
+        };
+        knockbackForce *= knockback ? 1f : 0f;  
+
         FrameFreeze.Freeze(0.3f, () =>
         {
             MainCameraShaker.instance.Shake(0.2f, 0.3f, 0.2f);
-            horizontalVelocity += (transform.position - source.transform.position).FlattenY().normalized * SPEED_KNOCKBACK;
+            if (source != null)
+                horizontalVelocity += (transform.position - source.transform.position).FlattenY().normalized * knockbackForce;
         });
 
         OnGetHurt?.Invoke(damage);
+    }
+    public void EnteredVoid ()
+    {
+        GetHit(null, 1, Weight.Light, "Fall", false);
+        transform.position = checkpoint;      
     }
 }
