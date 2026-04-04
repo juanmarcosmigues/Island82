@@ -1,22 +1,17 @@
 using UnityEngine;
 
-public class BounceOn : MonoBehaviour
+public class BounceOn : JumpOn
 {
     public float jumpImpulse;
-    public BoxCollider trigger;
+    
     public Animation anim;
     public VisualFeedback vfb;
 
     public event System.Action<BounceOn> OnBounce;
-    private void FixedUpdate()
+    public override void JumpedOn()
     {
-        if (trigger.bounds.Intersects(Player.Instance.coll.bounds) &&//Is now intersecting?
-            !Player.Instance.IsGrounded && //Is airborne
-            Player.Instance.VerticalVelocity < 1f && //Is kinda falling?
-            (Player.Instance.MaxAirBounds.Value.min.y - trigger.bounds.max.y) > -0.1f) //Was on top at some previous frame? 
-        {
-            Bounce();
-        }
+        base.JumpedOn();
+        Bounce();
     }
 
     public void Bounce ()

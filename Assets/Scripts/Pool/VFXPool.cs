@@ -24,6 +24,17 @@ public class VFXPool : ObjectPool
 
         return obj;
     }
+    public GameObject GetObject(Vector3 position)
+    {
+        var obj = base.GetObject(position, Quaternion.identity);
+
+        if (obj != null)
+        {
+            StartCoroutine(Lifespan(obj, defaultDuration));
+        }
+
+        return obj;
+    }
     public override GameObject GetObject(Vector3 position, Quaternion rotation)
     {
         var obj = base.GetObject(position, rotation);
