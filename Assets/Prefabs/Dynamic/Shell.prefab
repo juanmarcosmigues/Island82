@@ -42,7 +42,7 @@ BoxCollider:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -4901,8 +4901,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6898458764741177767}
-  - component: {fileID: 3339527910335091665}
   - component: {fileID: 7167872896349646189}
+  - component: {fileID: 3079204412148387548}
+  - component: {fileID: 6963085587971491832}
+  - component: {fileID: 3829032563450216898}
   m_Layer: 0
   m_Name: Shell
   m_TagString: Untagged
@@ -4928,19 +4930,6 @@ Transform:
   - {fileID: 2097770189984230408}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3339527910335091665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6450194275939434931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 079fe0187eaa91847a5dd8bcfaeb7a4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::JumpOn
-  trigger: {fileID: 1204071374220688183}
 --- !u!114 &7167872896349646189
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4955,6 +4944,61 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GenericDestroyable
   vfxOnDestroy: []
   childVFXOnDestroy: {fileID: 6065459414894138284}
+  sound: {fileID: 6963085587971491832}
+--- !u!114 &3079204412148387548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6450194275939434931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01b1654cc9e8a6a44adc57dd75322ad9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TriggerEventHandler
+--- !u!114 &6963085587971491832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6450194275939434931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b07243ad1f6f244cbf40484d470b272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectSounds
+  clip:
+  - key: Destroy
+    value: {fileID: 8300000, guid: 336cdf01c70ff5d4e99ca6fca40323b9, type: 3}
+--- !u!54 &3829032563450216898
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6450194275939434931}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &8912767411141287425
 GameObject:
   m_ObjectHideFlags: 0
