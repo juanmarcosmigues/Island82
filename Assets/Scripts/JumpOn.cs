@@ -1,10 +1,11 @@
 using UnityEngine;
 
-public class JumpOn : MonoBehaviour
+public class JumpOn : MonoBehaviour, ITrigger
 {
     public BoxCollider trigger;
 
     public event System.Action<JumpOn> OnJumpedOn;
+    public event System.Action<ITrigger> OnTriggered;
 
     private void FixedUpdate()
     {
@@ -18,6 +19,7 @@ public class JumpOn : MonoBehaviour
     }
     public virtual void JumpedOn ()
     {
+        OnTriggered?.Invoke(this);
         OnJumpedOn?.Invoke(this);
     }
 }

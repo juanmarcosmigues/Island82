@@ -1,17 +1,16 @@
 using UnityEngine;
 
-[RequireComponent (typeof(JumpOn))]
 public class GenericDestroyable : MonoBehaviour
 {
     public string[] vfxOnDestroy;
     public GameObject childVFXOnDestroy;
 
-    JumpOn jumpOn;
+    ITrigger trigger;
 
     private void Awake()
     {
-        jumpOn = GetComponent<JumpOn>();
-        jumpOn.OnJumpedOn += _ => DestroyObject();
+        trigger = GetComponent<ITrigger>();
+        trigger.OnTriggered += _ => DestroyObject();
     }
 
     public void DestroyObject ()
