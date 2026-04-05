@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using static CombatHandler;
 
@@ -29,6 +30,7 @@ public class Player : MonoBehaviour, IDynamicObject
     [HideInInspector] public BoxCollider coll;
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public CombatHandler combatHandler;
+    [HideInInspector] public ObjectSounds sounds;
 
     public event System.Action<int> OnPickUpCoin;
     public event System.Action OnGroundedStart;
@@ -67,6 +69,7 @@ public class Player : MonoBehaviour, IDynamicObject
         coll = GetComponent<BoxCollider>();
         input = GetComponent<PlayerInput>();
         combatHandler = GetComponent<CombatHandler>();
+        sounds = GetComponent<ObjectSounds>();
     }
     private void Start()
     {
@@ -154,6 +157,9 @@ public class Player : MonoBehaviour, IDynamicObject
             currentJumpForce = impulse;
             verticalVelocity.y = impulse * 0.7f;
             jumpValue = 1f;
+
+            sounds.PlaySound("Jump");
+
             return;
         }
 
@@ -169,16 +175,14 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     private void FixedUpdate()
     {
-        (bool found, Vector3 point) newGrounded = 
-            verticalVelocity.y <= 0f ? CheckGrounded() : (false, Vector3.zero);
+        (bool found, Vector3 point, Collider coll) newGrounded = 
+            verticalVelocity.y <= 0f ? CheckGrounded() : (false, Vector3.zero, null);
 
         if (newGrounded.found != grounded)
         {
             if (newGrounded.found)
             {
-                checkpoint = transform.position;
-                OnGroundedStart?.Invoke();
-                dust.Play();
+                Land(newGrounded.coll, newGrounded.point);
             }
         }
         grounded = newGrounded.found;
@@ -226,7 +230,7 @@ public class Player : MonoBehaviour, IDynamicObject
                 ? coll.bounds : MaxAirBounds.Value;
         }
     }
-    private (bool, Vector3) CheckGrounded ()
+    private (bool, Vector3, Collider) CheckGrounded ()
     {
         RaycastHit r;
         float padding = 0.01f;
@@ -237,11 +241,35 @@ public class Player : MonoBehaviour, IDynamicObject
         {
             if (Physics.Raycast(bottomCenter + groundCheckPoints[i], Vector3.down, out r, distance, groundMask))
             {
-                return (true, r.point);
+                return (true, r.point, r.collider);
             }
         }
 
-        return (false, Vector3.zero);
+        return (false, Vector3.zero, null);
+    }
+    void Land (Collider coll, Vector3 point)
+    {
+        checkpoint = transform.position;
+
+        var surface = coll.GetComponent<SurfaceProperties>();
+        string sound = "StepRock";
+        if (surface != null)
+        {
+            sound = surface.material switch
+            {
+                SurfaceProperties.Material.Wood => "StepWood",
+                SurfaceProperties.Material.Grass => "StepGrass",
+                SurfaceProperties.Material.Rock => "StepRock",
+                SurfaceProperties.Material.Sand => "StepSand",
+                SurfaceProperties.Material.Water => "StepWater",
+                _ => "StepRock"
+            };
+        }
+
+        sounds.PlaySound(sound);
+
+        OnGroundedStart?.Invoke();
+        dust.Play();
     }
     void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
     {

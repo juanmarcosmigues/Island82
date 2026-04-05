@@ -4,6 +4,7 @@ public class GenericDestroyable : MonoBehaviour
 {
     public string[] vfxOnDestroy;
     public GameObject childVFXOnDestroy;
+    public ObjectSounds sound;
 
     ITrigger trigger;
 
@@ -22,6 +23,8 @@ public class GenericDestroyable : MonoBehaviour
             childVFXOnDestroy.transform.SetParent(null);
             childVFXOnDestroy.transform.gameObject.SetActive(true);
         }
+        if (sound != null)
+            sound.PlaySound("Destroy");
 
         gameObject.SetActive(false);
     }

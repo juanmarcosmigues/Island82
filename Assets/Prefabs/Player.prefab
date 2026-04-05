@@ -170,6 +170,7 @@ GameObject:
   - component: {fileID: 4091046781058161331}
   - component: {fileID: 884411800315559275}
   - component: {fileID: 8940460595019509239}
+  - component: {fileID: 8863691615183598174}
   m_Layer: 3
   m_Name: Player
   m_TagString: Player
@@ -314,6 +315,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc35f953bafeed4bb28f9993694e6f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatHandler
+--- !u!114 &8863691615183598174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5259753470061312935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b07243ad1f6f244cbf40484d470b272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectSounds
+  clip:
+  - key: Jump
+    value: {fileID: 8300000, guid: 331ec7ae280640a429f84332fd423aa8, type: 3}
+  - key: StepGrass
+    value: {fileID: 8300000, guid: bc12af072dacd8a49ae65128079ee9c2, type: 3}
+  - key: StepRock
+    value: {fileID: 8300000, guid: 8ad4ad22d8f721f4ab1e3165452b8f07, type: 3}
+  - key: StepSand
+    value: {fileID: 8300000, guid: 1a181bc9b9d03254cbf2560e62a9f49b, type: 3}
+  - key: StepWood
+    value: {fileID: 8300000, guid: c302e0666b20c584f8d5077cf91e8bfd, type: 3}
 --- !u!1 &5634750701356016263
 GameObject:
   m_ObjectHideFlags: 0

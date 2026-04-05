@@ -11,5 +11,7 @@ public class LoadSceneTrigger : MonoBehaviour
 
         player.input.inputEnabled = false;
         SceneTransitioner.LoadScene(sceneName, 1, 1, 2);
+
+        AmbiencePlayer.FadeOutAll(1f);
     }
 }
