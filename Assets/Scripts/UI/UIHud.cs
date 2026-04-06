@@ -4,16 +4,36 @@ using UnityEngine.UI;
 
 public class UIHud : MonoBehaviour
 {
+    public static UIHud Instance { get; private set; }
+
     public TextMeshProUGUI tmpClock;
     public TextMeshProUGUI tmpCoins;
     public GameObject[] lifePoints;
     private int hours, minutes, seconds;
     private string clockDots = ":";
 
+    private void Awake()
+    {
+        SingletonGameObject parent = GetComponentInParent<SingletonGameObject>();
+        if (parent != null)
+        {
+            if (parent.queuedToBeDestroyed)
+                return;
+        }
+
+        Instance = this;
+
+        gameObject.SetActive(false);
+    }
     private void Start()
     {
         GameplayManager.Instance.OnAddCoins += AddCoins;
         Player.Instance.OnGetHurt += PlayerHurt;
+    }
+    private void OnDestroy()
+    {
+        GameplayManager.Instance.OnAddCoins -= AddCoins;
+        Player.Instance.OnGetHurt -= PlayerHurt;
     }
     private void Update()
     {
