@@ -17,4 +17,8 @@ public class ObjectSounds : MonoBehaviour
     {
         SoundManager.instance.PlaySound(GetClip(key), transform.position);
     }
+    public void PlaySound (string key, float volume, float pitch = 1f)
+    {
+        SoundManager.instance.PlaySound(GetClip(key), transform.position, volume, pitch);
+    }
 }

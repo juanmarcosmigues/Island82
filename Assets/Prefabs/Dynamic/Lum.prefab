@@ -81,7 +81,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Time: 0.25
+  m_Time: 0.1
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -5061,7 +5061,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Lum
   renderRoot: {fileID: 8824691764374407770}
   fromDrop: 0
-  groundMask:
+  bounceMask:
     serializedVersion: 2
     m_Bits: 320
 --- !u!54 &7809077217110290216

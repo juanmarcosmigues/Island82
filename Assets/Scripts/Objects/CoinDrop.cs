@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class CoinDrop : MonoBehaviour
 {
+    private const float  ANGLE_ERROR = 15f;
+
     public float force;
     public float radius;
 
@@ -26,14 +28,14 @@ public class CoinDrop : MonoBehaviour
         Vector3 forward = Camera.main.RotateTowardsCamera(new Vector2(0, 1f));
         for (int i = 0; i < coins.Length; i++)
         {
-            Vector3 f = Quaternion.AngleAxis(angle * i, Vector3.up) * forward;
+            Vector3 f = Quaternion.AngleAxis(angle * i + Random.Range(-ANGLE_ERROR, ANGLE_ERROR), Vector3.up) * forward;
             f = f.normalized;
 
             coins[i].transform.localPosition = Vector3.zero;
             coins[i].transform.SetParent(null);
 
             coins[i].transform.position += f * radius;
-            coins[i].SetVelocity((f * 0.5f + Vector3.up).normalized * force * Random.Range(0.6f, 1f));
+            coins[i].SetVelocity((f * 0.75f + Vector3.up).normalized * force * Random.Range(0.6f, 1f));
 
             coins[i].OnPickUp += ReturnCoin;
         }

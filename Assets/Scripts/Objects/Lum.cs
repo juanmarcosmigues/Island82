@@ -3,16 +3,15 @@ using UnityEngine;
 
 public class Lum : MonoBehaviour
 {
-    private const float MAX_GRAVITY = -12f;
-    private const float GRAVITY = -6f;
-    private const float MAGNETIC = 5f;
-    private const float DRAG = 0.5f;
-    private const float MAX_BOUNCE = 3f;
+    private const float MAX_GRAVITY = -5f;
+    private const float GRAVITY = -2f;
+    private const float MAGNETIC = 7f;
+    private const float DRAG = 5f;
     private const float RANDOM_MAGNETIC = 0.3f;
 
     public Transform renderRoot;
     public bool fromDrop = false;
-    public LayerMask groundMask;
+    public LayerMask bounceMask;
 
     public event System.Action<Lum> OnPickUp;
 
@@ -24,15 +23,15 @@ public class Lum : MonoBehaviour
     private float gravityInfluence;
     private float magneticInfluence;
     private Timestamp timerAlive;
-    private Timestamp timerMagnetic;
-    private int bounces = 3;
-    private bool bounceConsumed;
+    private int bounces;
+
+    private Vector3 dropVelocity;
+    private Vector3 magneticVelocity;
     private Vector3 verticalVelocity;
-    private Vector3 horizontalVelocity;
+    private Vector3 bounceVelocity;
+
     private Vector3 followDirection;
     private Vector3 deltaToPlayer;
-    private float distanceSqrToPlayer;
-    private float sign;
 
     private void Awake()
     {
@@ -48,30 +47,25 @@ public class Lum : MonoBehaviour
         magnetic = false;
         gravityInfluence = 1f;
         magneticInfluence = 0f;
-        bounces = 3;
-        bounceConsumed = false;
-        horizontalVelocity = Vector3.zero;
-        verticalVelocity = Vector3.zero;
+        dropVelocity = Vector3.zero;
+        magneticVelocity = Vector3.zero;
         rb.linearVelocity = Vector3.zero;
         coll.enabled = true;
         magneticTimeStart = 0.7f + Random.Range(-RANDOM_MAGNETIC, RANDOM_MAGNETIC);
+        bounces = 3;
     }
     private void Update()
     {
         if (!magnetic && timerAlive.elapsed > magneticTimeStart) 
         {
-            sign = Mathf.Sign(Random.Range(-1f, 1));
             magnetic = true;
             coll.enabled = false;
-            timerMagnetic.Set();
-            followDirection = Quaternion.AngleAxis(sign * 20f, Vector3.up) * -deltaToPlayer.FlattenY();
-            verticalVelocity = Vector3.up * 2f;       
+            followDirection = deltaToPlayer.FlattenY();
         }
     }
     private void FixedUpdate()
     {
         deltaToPlayer = Player.Instance.transform.position - transform.position;
-        distanceSqrToPlayer = deltaToPlayer.sqrMagnitude;
         Vector3 flatDelta = deltaToPlayer.FlattenY();
 
         if ((flatDelta.sqrMagnitude < 0.17f && Mathf.Abs(deltaToPlayer.y) < 0.7f) && timerAlive.elapsed > 0.5f)
@@ -84,59 +78,50 @@ public class Lum : MonoBehaviour
         }
 
         PhysicsStep();
-
-        if (magnetic)
-            MagneticStep();
     }
 
-    void MagneticStep ()
-    {
-        gravityInfluence = Mathf.Clamp01(gravityInfluence - Time.fixedDeltaTime);
-        magneticInfluence = magneticInfluence + Time.fixedDeltaTime;
-        float magneticInfluenceSqr = magneticInfluence * magneticInfluence;
-
-        verticalVelocity.y = Mathf.MoveTowards(verticalVelocity.y, Mathf.Sign(deltaToPlayer.y) * MAGNETIC, magneticInfluence * 0.5f);
-
-        Vector3 goalDirection = Quaternion.AngleAxis(sign * Mathf.Sin(magneticInfluence) * 45f * Mathf.Clamp01(2 - magneticInfluence), Vector3.up) * deltaToPlayer.FlattenY();
-        followDirection = Vector3.RotateTowards
-            (followDirection.normalized,
-            goalDirection.normalized,
-            magneticInfluenceSqr * 0.2f, magneticInfluence);
-
-        horizontalVelocity = followDirection * Mathf.Clamp01(magneticInfluenceSqr * 0.5f) * MAGNETIC;
-
-        ////Fixed vertical move
-        //Vector3 goalPos = rb.position;
-        //goalPos.y = Player.Instance.transform.position.y;
-        //rb.MovePosition(Vector3.Lerp(rb.position, goalPos, magneticInfluence * 0.05f));
-    }
     void PhysicsStep ()
     {
-        if (bounces > 0 && verticalVelocity.y < 0f)
+        if (magnetic)
         {
-            if (Physics.Raycast(transform.position, Vector3.down, 0.15f, groundMask) && !bounceConsumed)
-            {
-                bounceConsumed = true;
-                verticalVelocity = Vector3.up * Mathf.Min(Mathf.Abs(verticalVelocity.y), MAX_BOUNCE) * (bounces / 3f);
-                bounces--;
-            }
-            else
-            {
-                bounceConsumed = false;
-            }
+            gravityInfluence = Mathf.Clamp01(gravityInfluence - Time.fixedDeltaTime);
+            magneticInfluence = magneticInfluence + Time.fixedDeltaTime;
         }
+
+        float magneticInfluenceSqr = magneticInfluence * magneticInfluence;
+
+        followDirection = Vector3.RotateTowards
+            (followDirection.normalized,
+            deltaToPlayer.normalized,
+            magneticInfluenceSqr * 0.2f, magneticInfluence);
+
+        magneticVelocity = followDirection * Mathf.Clamp01(magneticInfluenceSqr * 0.5f) * MAGNETIC;
 
         verticalVelocity += Vector3.up * GRAVITY * Time.fixedDeltaTime * gravityInfluence;
         verticalVelocity.y = Mathf.Max(verticalVelocity.y, MAX_GRAVITY);
 
-        horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, DRAG * Time.fixedDeltaTime);
+        dropVelocity = Vector3.MoveTowards(dropVelocity, Vector3.zero, DRAG * Time.fixedDeltaTime);
+        bounceVelocity = Vector3.MoveTowards(bounceVelocity, Vector3.zero, DRAG * Time.fixedDeltaTime);
 
-        rb.linearVelocity = verticalVelocity + horizontalVelocity;
+        rb.linearVelocity = dropVelocity + magneticVelocity + verticalVelocity + bounceVelocity;
+
+        if (bounces > 0)
+        {
+            RaycastHit hit;
+            Vector3 frameVelocity = rb.linearVelocity * Time.fixedDeltaTime;
+            if (Physics.SphereCast(rb.position, 0.2f, frameVelocity.normalized, out hit, frameVelocity.magnitude, bounceMask))
+            {
+                Vector3 reflection = Vector3.Reflect(rb.linearVelocity, hit.normal);
+                verticalVelocity = Vector3.Project(reflection, Vector3.up);
+                dropVelocity.y = 0f;
+                bounceVelocity = reflection.FlattenY();
+
+                bounces--;
+            }
+        }
     }
     public void SetVelocity (Vector3 velocity)
     {
-        verticalVelocity.y = velocity.y;
-        horizontalVelocity.x = velocity.x;
-        horizontalVelocity.z = velocity.z;
+        dropVelocity = velocity;
     }
 }

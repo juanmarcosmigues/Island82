@@ -61,6 +61,8 @@ public class Player : MonoBehaviour, IDynamicObject
     Vector3 verticalVelocity;
     Vector3 horizontalVelocity;
 
+    float pickUpCoinCombo;
+
     private void Awake()
     {
         Instance = this;
@@ -112,6 +114,9 @@ public class Player : MonoBehaviour, IDynamicObject
             renderRoot.gameObject.SetActive(true);
             Invulnerable = false;
         }
+
+        if (pickUpCoinCombo > 0f)
+            pickUpCoinCombo = Mathf.Clamp01(pickUpCoinCombo-Time.deltaTime*0.5f);
     }
 
     private void PressJump ()
@@ -139,6 +144,9 @@ public class Player : MonoBehaviour, IDynamicObject
     public void GetCoin ()
     {
         vfGetCoin.Play();
+        float pitch = Mathf.Lerp(0.9f, 1.2f, Mathf.Clamp01(pickUpCoinCombo));
+        sounds.PlaySound("PickUp", 0.5f);
+        pickUpCoinCombo += 0.15f;
         OnPickUpCoin?.Invoke(1);
     }
     public void InsideObject (bool inside)

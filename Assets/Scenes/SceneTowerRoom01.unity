@@ -12285,6 +12285,10 @@ PrefabInstance:
       value: SkullSpider
       objectReference: {fileID: 0}
     - target: {fileID: 4562509252599632308, guid: 14c01ec078655684d906cfd535881e22, type: 3}
+      propertyPath: drop
+      value: CoinDropX5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4562509252599632308, guid: 14c01ec078655684d906cfd535881e22, type: 3}
       propertyPath: path
       value: 
       objectReference: {fileID: 1187923277}

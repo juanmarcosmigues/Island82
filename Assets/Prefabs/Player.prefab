@@ -276,6 +276,7 @@ MonoBehaviour:
   coll: {fileID: 1456306069388393285}
   rb: {fileID: 0}
   combatHandler: {fileID: 0}
+  sounds: {fileID: 0}
 --- !u!114 &4091046781058161331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,6 +339,8 @@ MonoBehaviour:
     value: {fileID: 8300000, guid: 1a181bc9b9d03254cbf2560e62a9f49b, type: 3}
   - key: StepWood
     value: {fileID: 8300000, guid: c302e0666b20c584f8d5077cf91e8bfd, type: 3}
+  - key: PickUp
+    value: {fileID: 8300000, guid: 7ba70135c19217a4684e7ce945873f73, type: 3}
 --- !u!1 &5634750701356016263
 GameObject:
   m_ObjectHideFlags: 0
