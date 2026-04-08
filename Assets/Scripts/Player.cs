@@ -285,9 +285,9 @@ public class Player : MonoBehaviour, IDynamicObject
         float knockbackForce = SPEED_KNOCKBACK;
         knockbackForce *= weight switch
         {
-            Weight.Light => 0.3f,
-            Weight.Medium => 0.7f,
-            Weight.Heavy => 1f,
+            Weight.Light => 0.8f,
+            Weight.Medium => 1f,
+            Weight.Heavy => 1.2f,
             _ => 1.0f 
         };
         knockbackForce *= knockback ? 1f : 0f;  

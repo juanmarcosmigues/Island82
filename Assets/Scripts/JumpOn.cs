@@ -4,6 +4,7 @@ public class JumpOn : MonoBehaviour, ITrigger
 {
     public BoxCollider trigger;
 
+    public Timestamp timerJumpedOn;
     public event System.Action<JumpOn> OnJumpedOn;
     public event System.Action<ITrigger> OnTriggered;
 
@@ -19,6 +20,7 @@ public class JumpOn : MonoBehaviour, ITrigger
     }
     public virtual void JumpedOn ()
     {
+        timerJumpedOn.Set();
         OnTriggered?.Invoke(this);
         OnJumpedOn?.Invoke(this);
     }

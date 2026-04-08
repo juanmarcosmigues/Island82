@@ -48,6 +48,10 @@ public class CoinDrop : MonoBehaviour
         aliveCoins--;
 
         if (aliveCoins <= 0)
+        {
             gameObject.SetActive(false);
+            coins.ForEach(coin => coin.gameObject.SetActive(true));
+        }
+
     }
 }

@@ -963,7 +963,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.1326, y: 1.1326, z: 1.1326}
+  m_LocalScale: {x: 0.983709, y: 0.983709, z: 0.983709}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2409670100550102202}
@@ -975,7 +975,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6397955992369467281}
-  m_Mesh: {fileID: -8757127265071122162, guid: aa300884f58fb994a970e1c5e2a395fd, type: 3}
+  m_Mesh: {fileID: -3396479065248852544, guid: 5da2580ef477f024fa1f8174d6445e08, type: 3}
 --- !u!23 &2549041849524604705
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1001,7 +1001,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 5015ee306ae9d9845adbaf24680d1aec, type: 2}
+  - {fileID: 2100000, guid: 3219b1e6e237be14ca92d0ddb272e6e8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1178,7 +1178,7 @@ GameObject:
   - component: {fileID: 6493519946073402413}
   - component: {fileID: 1364665706725001958}
   m_Layer: 8
-  m_Name: EnemyTurret
+  m_Name: Turret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1253,8 +1253,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b64ce30ae37a12745addd5372df3855e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BounceOn
-  jumpImpulse: 12
   trigger: {fileID: 1188928271658083857}
+  jumpImpulse: 12
   anim: {fileID: 448251155521098485}
   vfb: {fileID: 0}
 --- !u!114 &6493519946073402413

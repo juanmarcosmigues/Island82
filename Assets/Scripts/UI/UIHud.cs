@@ -22,8 +22,6 @@ public class UIHud : MonoBehaviour
         }
 
         Instance = this;
-
-        gameObject.SetActive(false);
     }
     private void Start()
     {

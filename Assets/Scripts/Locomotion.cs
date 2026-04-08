@@ -1,0 +1,90 @@
+using UnityEngine;
+
+public class Locomotion : MonoBehaviour
+{
+    public float speed;
+    public float gravity;
+    public float drag;
+    public float airDrag;
+    public float rotationSpeed;
+
+    private Rigidbody rigidBody;
+    private new Collider collider;
+    private CheckGround groundChecker;
+
+    bool tickedMove;
+
+    bool grounded;
+
+    Vector3 lastVelocity;
+    Vector3 moveVelocity;
+    Vector3 verticalVelocity;
+    Vector3 horizontalVelocity;
+
+    void Awake()
+    {
+        rigidBody = GetComponent<Rigidbody>();
+        groundChecker = GetComponent<CheckGround>();
+        collider = GetComponent<Collider>();
+    }
+    void FixedUpdate ()
+    {
+        //Grounded Step ----------------------------->
+        bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
+        if (newGrounded != grounded)
+        {
+            if (newGrounded)
+            {
+                Land(groundChecker.GroundData);
+            }
+        }
+        grounded = newGrounded;
+
+        //Velocity Step ----------------------------->
+        Vector3 velocity = Vector3.zero;
+
+        if (!tickedMove) 
+            moveVelocity = Vector3.zero;
+
+        if (grounded)
+            verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
+        else
+            verticalVelocity += gravity * Vector3.up * Time.fixedDeltaTime;
+
+        if (verticalVelocity.y <= 0f && grounded)
+            rigidBody.MovePosition(rigidBody.position + (groundChecker.GroundData.point.y - collider.bounds.min.y) * Vector3.up); //snap
+
+        if (grounded)
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, drag * Time.fixedDeltaTime);
+        else
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, airDrag * Time.fixedDeltaTime);
+
+        velocity += verticalVelocity;
+        velocity += moveVelocity;
+        velocity += horizontalVelocity;
+
+        rigidBody.linearVelocity = velocity;
+        lastVelocity = velocity;
+
+        //Other --------------------------------------->
+        Vector3 lookDirection = Vector3.RotateTowards(transform.forward, moveVelocity.normalized, rotationSpeed * Time.fixedDeltaTime, rotationSpeed * Time.fixedDeltaTime);
+        if (moveVelocity.sqrMagnitude < 0.001f)
+            lookDirection = transform.forward;
+
+        Quaternion rotation = Quaternion.LookRotation(lookDirection, Vector3.up);
+        rigidBody.MoveRotation(rotation);
+
+        //End Step ------------------------------------>
+        tickedMove = false;
+    }
+    void Land (GroundData ground)
+    {
+
+    }
+
+    public void Move(Vector3 direction, float factor = 1f)
+    {
+        moveVelocity = direction * speed * factor;
+        tickedMove = true;
+    }
+}
