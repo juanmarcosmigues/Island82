@@ -6,12 +6,12 @@ public class CoinDrop : MonoBehaviour
     public float force;
     public float radius;
 
-    private Coin[] coins;
+    private Lum[] coins;
     private int aliveCoins;
 
     private void Awake()
     {
-        coins = GetComponentsInChildren<Coin>();
+        coins = GetComponentsInChildren<Lum>();
     }
 
     private void OnEnable()
@@ -33,13 +33,13 @@ public class CoinDrop : MonoBehaviour
             coins[i].transform.SetParent(null);
 
             coins[i].transform.position += f * radius;
-            coins[i].SetVelocity((f * 0.35f + Vector3.up).normalized * force);
+            coins[i].SetVelocity((f * 0.5f + Vector3.up).normalized * force * Random.Range(0.6f, 1f));
 
             coins[i].OnPickUp += ReturnCoin;
         }
         aliveCoins = coins.Length;
     }
-    private void ReturnCoin (Coin c)
+    private void ReturnCoin (Lum c)
     {
         c.OnPickUp -= ReturnCoin;
         c.transform.SetParent(transform);
