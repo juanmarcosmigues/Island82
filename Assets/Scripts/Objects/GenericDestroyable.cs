@@ -5,12 +5,17 @@ public class GenericDestroyable : MonoBehaviour
     public string[] vfxOnDestroy;
     public GameObject childVFXOnDestroy;
     public ObjectSounds sound;
+    [Range(0f, 1f)]
+    public float dropChance;
+    public string drop;
 
     ITrigger trigger;
 
     private void Awake()
     {
         trigger = GetComponent<ITrigger>();
+        if (trigger ==null)
+            trigger = GetComponentInChildren<ITrigger>();
         trigger.OnTriggered += _ => DestroyObject();
     }
 
@@ -25,6 +30,11 @@ public class GenericDestroyable : MonoBehaviour
         }
         if (sound != null)
             sound.PlaySound("Destroy");
+
+        if (Random.value <= dropChance && drop.Length > 0)
+        {
+            PoolManager.Instance.GetPool<ObjectPool>(drop).GetObject().transform.position = transform.position;
+        }
 
         gameObject.SetActive(false);
     }

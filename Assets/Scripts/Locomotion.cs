@@ -20,6 +20,7 @@ public class Locomotion : MonoBehaviour
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
     Vector3 horizontalVelocity;
+    MovingSurface movingSurface;
 
     void Awake()
     {
@@ -33,8 +34,10 @@ public class Locomotion : MonoBehaviour
         bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
         if (newGrounded != grounded)
         {
+            movingSurface = null;
             if (newGrounded)
             {
+                movingSurface = groundChecker.GroundData.coll.GetComponent<MovingSurface>();
                 Land(groundChecker.GroundData);
             }
         }
@@ -62,6 +65,12 @@ public class Locomotion : MonoBehaviour
         velocity += verticalVelocity;
         velocity += moveVelocity;
         velocity += horizontalVelocity;
+
+        Vector3 feetPosition = rigidBody.position;
+        feetPosition.y = collider.bounds.min.y;
+
+        if (movingSurface)
+            rigidBody.MovePosition(rigidBody.position + movingSurface.GetFinalFrameTranslation(feetPosition));
 
         rigidBody.linearVelocity = velocity;
         lastVelocity = velocity;

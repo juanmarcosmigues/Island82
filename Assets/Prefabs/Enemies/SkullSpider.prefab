@@ -157,6 +157,7 @@ GameObject:
   - component: {fileID: 7738128646696682904}
   - component: {fileID: 5299317638424568356}
   - component: {fileID: 2501965242253785325}
+  - component: {fileID: 9045906993064519219}
   m_Layer: 11
   m_Name: SkullSpider
   m_TagString: Untagged
@@ -261,7 +262,7 @@ MonoBehaviour:
   path: {fileID: 0}
   patrolThreshold: 0.2
   dropChance: 1
-  drop: CoinDropX3
+  drop: CoinDropX5
 --- !u!114 &7738128646696682904
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -316,6 +317,23 @@ MonoBehaviour:
   jumpImpulse: 12
   anim: {fileID: 7509503106148876573}
   vfb: {fileID: 0}
+--- !u!114 &9045906993064519219
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641453256261294166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b07243ad1f6f244cbf40484d470b272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectSounds
+  clip:
+  - key: DieCry
+    value: {fileID: 8300000, guid: 8a3cbf8e2e405a04490b07c70ca10820, type: 3}
+  - key: DieSFX
+    value: {fileID: 8300000, guid: 336cdf01c70ff5d4e99ca6fca40323b9, type: 3}
 --- !u!1 &1108405846323230892
 GameObject:
   m_ObjectHideFlags: 0

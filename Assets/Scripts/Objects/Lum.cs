@@ -6,8 +6,8 @@ public class Lum : MonoBehaviour
     private const float MAX_GRAVITY = -5f;
     private const float GRAVITY = -2f;
     private const float MAGNETIC = 7f;
-    private const float DRAG = 5f;
-    private const float RANDOM_MAGNETIC = 0.3f;
+    private const float DRAG = 6f;
+    private const float RANDOM_MAGNETIC = 0.4f;
 
     public Transform renderRoot;
     public bool fromDrop = false;
@@ -51,7 +51,7 @@ public class Lum : MonoBehaviour
         magneticVelocity = Vector3.zero;
         rb.linearVelocity = Vector3.zero;
         coll.enabled = true;
-        magneticTimeStart = 0.7f + Random.Range(-RANDOM_MAGNETIC, RANDOM_MAGNETIC);
+        magneticTimeStart = 0.6f + Random.Range(-RANDOM_MAGNETIC, RANDOM_MAGNETIC);
         bounces = 3;
     }
     private void Update()
@@ -61,6 +61,7 @@ public class Lum : MonoBehaviour
             magnetic = true;
             coll.enabled = false;
             followDirection = deltaToPlayer.FlattenY();
+            verticalVelocity.y = 2f;
         }
     }
     private void FixedUpdate()
@@ -105,20 +106,20 @@ public class Lum : MonoBehaviour
 
         rb.linearVelocity = dropVelocity + magneticVelocity + verticalVelocity + bounceVelocity;
 
-        if (bounces > 0)
-        {
-            RaycastHit hit;
-            Vector3 frameVelocity = rb.linearVelocity * Time.fixedDeltaTime;
-            if (Physics.SphereCast(rb.position, 0.2f, frameVelocity.normalized, out hit, frameVelocity.magnitude, bounceMask))
-            {
-                Vector3 reflection = Vector3.Reflect(rb.linearVelocity, hit.normal);
-                verticalVelocity = Vector3.Project(reflection, Vector3.up);
-                dropVelocity.y = 0f;
-                bounceVelocity = reflection.FlattenY();
+        //if (bounces > 0)
+        //{
+        //    RaycastHit hit;
+        //    Vector3 frameVelocity = rb.linearVelocity * Time.fixedDeltaTime;
+        //    if (Physics.SphereCast(rb.position, 0.2f, frameVelocity.normalized, out hit, frameVelocity.magnitude, bounceMask))
+        //    {
+        //        Vector3 reflection = Vector3.Reflect(rb.linearVelocity, hit.normal);
+        //        verticalVelocity.y = 0f;
+        //        dropVelocity.y = 0f;
+        //        bounceVelocity = reflection.FlattenY();
 
-                bounces--;
-            }
-        }
+        //        bounces--;
+        //    }
+        //}
     }
     public void SetVelocity (Vector3 velocity)
     {

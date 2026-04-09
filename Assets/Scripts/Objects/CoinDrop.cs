@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class CoinDrop : MonoBehaviour
 {
-    private const float  ANGLE_ERROR = 15f;
+    private const float  ANGLE_ERROR = 30f;
 
     public float force;
     public float radius;
@@ -35,7 +35,7 @@ public class CoinDrop : MonoBehaviour
             coins[i].transform.SetParent(null);
 
             coins[i].transform.position += f * radius;
-            coins[i].SetVelocity((f * 0.75f + Vector3.up).normalized * force * Random.Range(0.6f, 1f));
+            coins[i].SetVelocity((f + Vector3.up * 0.7f).normalized * force * Random.Range(0.6f, 1f));
 
             coins[i].OnPickUp += ReturnCoin;
         }

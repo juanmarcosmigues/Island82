@@ -56,6 +56,7 @@ public class Player : MonoBehaviour, IDynamicObject
     Vector3 ground;
     float jumpValue;
     Vector3 checkpoint;
+    MovingSurface movingSurface;
 
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
@@ -188,8 +189,10 @@ public class Player : MonoBehaviour, IDynamicObject
 
         if (newGrounded.found != grounded)
         {
+            movingSurface = null;
             if (newGrounded.found)
             {
+                movingSurface = newGrounded.coll.GetComponent<MovingSurface>();
                 Land(newGrounded.coll, newGrounded.point);
             }
         }
@@ -222,7 +225,14 @@ public class Player : MonoBehaviour, IDynamicObject
         IsGrounded = grounded;
         VerticalVelocity = verticalVelocity.y;
 
+        Vector3 feetPosition = rb.position;
+        feetPosition.y = coll.bounds.min.y;
+
+        if (movingSurface)
+            rb.MovePosition(rb.position + movingSurface.GetFinalFrameTranslation(feetPosition));
+
         rb.linearVelocity = velocity;
+        
         lastVelocity = velocity;
 
         if (grounded)
@@ -249,7 +259,8 @@ public class Player : MonoBehaviour, IDynamicObject
         {
             if (Physics.Raycast(bottomCenter + groundCheckPoints[i], Vector3.down, out r, distance, groundMask))
             {
-                return (true, r.point, r.collider);
+                if (r.normal.y > 0.75)
+                    return (true, r.point, r.collider);
             }
         }
 

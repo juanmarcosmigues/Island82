@@ -271,7 +271,7 @@ MonoBehaviour:
   coll: {fileID: 853321580472432279}
   anim: {fileID: 5216761398687101111}
   combatHandler: {fileID: 4747240802054910114}
-  dropChance: 0.5
+  dropChance: 1
   drop: CoinDropX3
 --- !u!65 &853321580472432279
 BoxCollider:
@@ -306,8 +306,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b64ce30ae37a12745addd5372df3855e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BounceOn
-  jumpImpulse: 12
   trigger: {fileID: 6884835115668877403}
+  jumpImpulse: 12
   anim: {fileID: 0}
   vfb: {fileID: 0}
 --- !u!114 &5084705276664470718

@@ -14,6 +14,7 @@ public class EnemySkullSpider : MonoBehaviour
     private JumpOn jumpOn;
     private Patrol patrol;
     private EnemyHitbox hitbox;
+    private ObjectSounds sounds;
 
     Vector3 lastMoveDirection;
     bool dead = false;
@@ -24,6 +25,7 @@ public class EnemySkullSpider : MonoBehaviour
         patrol = new Patrol(path, patrolThreshold);
         jumpOn = GetComponent<JumpOn>();
         hitbox = GetComponentInChildren<EnemyHitbox>();
+        sounds = GetComponentInChildren<ObjectSounds>();
 
         jumpOn.OnJumpedOn += _ => Die(true);
     }
@@ -47,6 +49,9 @@ public class EnemySkullSpider : MonoBehaviour
     }
     IEnumerator DieAnimation(bool delay)
     {
+        sounds.PlaySound("DieCry");
+        sounds.PlaySound("DieSFX");
+
         if (delay)
             yield return new WaitForSeconds(0.08f);
 
