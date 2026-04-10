@@ -113,7 +113,7 @@ MonoBehaviour:
   root: {fileID: 1379619630175925005}
   shadow: {fileID: 1898269456843182359}
   horizontalRadius: 0.7
-  verticalRadius: 2.5
+  verticalRadius: 1
   maxAngle: 12
   shadowInfluence: 0.1
 --- !u!1 &9182999342406954714

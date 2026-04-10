@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 818335449851827199}
   - component: {fileID: 5748988363423295448}
+  - component: {fileID: 2234564818436442965}
   m_Layer: 8
   m_Name: Bush
   m_TagString: Untagged
@@ -55,6 +56,24 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.38
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2234564818436442965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5625069020486955871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aed870949986c0f4cae271269a6fbd70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlantInteraction
+  root: {fileID: 7076368978383418990}
+  shadow: {fileID: 4094466658373185516}
+  horizontalRadius: 1
+  verticalRadius: 1
+  maxAngle: 15
+  shadowInfluence: 0.1
 --- !u!1 &5964812273492212836
 GameObject:
   m_ObjectHideFlags: 0
@@ -113,9 +132,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6170716155962995383}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.50000095, y: -0.49999914, z: -0.5000009, w: -0.4999991}
+  m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0.006, z: 0}
-  m_LocalScale: {x: 1.3629243, y: 1.3629246, z: 1.3629246}
+  m_LocalScale: {x: 1.0979037, y: 1.0979038, z: 1.0979038}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 818335449851827199}
@@ -228,7 +247,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: 9607a919c3952574ba2e3f3c3c85e98e, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 5015ee306ae9d9845adbaf24680d1aec, type: 2}
+      objectReference: {fileID: 2100000, guid: e698c4193d9be914384bcad5b8ebdb5e, type: 2}
     - target: {fileID: 919132149155446097, guid: 9607a919c3952574ba2e3f3c3c85e98e, type: 3}
       propertyPath: m_Name
       value: bush01
