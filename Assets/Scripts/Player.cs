@@ -118,6 +118,8 @@ public class Player : MonoBehaviour, IDynamicObject
 
         if (pickUpCoinCombo > 0f)
             pickUpCoinCombo = Mathf.Clamp01(pickUpCoinCombo-Time.deltaTime*0.5f);
+
+        Shader.SetGlobalVector("_PlayerPosition", transform.position);
     }
 
     private void PressJump ()
