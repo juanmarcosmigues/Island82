@@ -215,7 +215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.2901961, g: 0.42352945, b: 0.25882354, a: 1}
+  m_Color: {r: 0.18039216, g: 0.32156864, b: 0.18039216, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -345,8 +345,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4282543177
-  m_fontColor: {r: 0.28627452, g: 0.42352945, b: 0.25882354, a: 1}
+    rgba: 4281433170
+  m_fontColor: {r: 0.32156864, g: 0.48627454, b: 0.19215688, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -604,7 +604,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.28627452, g: 0.42352945, b: 0.25882354, a: 1}
+  m_Color: {r: 0.32156864, g: 0.48627454, b: 0.19215688, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -709,8 +709,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4282543177
-  m_fontColor: {r: 0.28627452, g: 0.42352945, b: 0.25882354, a: 1}
+    rgba: 4281433170
+  m_fontColor: {r: 0.32156864, g: 0.48627454, b: 0.19215688, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1035,8 +1035,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4282084423
-  m_fontColor: {r: 0.2784314, g: 0.42352945, b: 0.23137257, a: 1}
+    rgba: 4281231679
+  m_fontColor: {r: 0.24705884, g: 0.41176474, b: 0.18039216, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1217,8 +1217,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4282084423
-  m_fontColor: {r: 0.2784314, g: 0.42352945, b: 0.23137257, a: 1}
+    rgba: 4281231679
+  m_fontColor: {r: 0.24705884, g: 0.41176474, b: 0.18039216, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1338,7 +1338,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.09233714, g: 0.23584908, b: 0.17548731, a: 1}
+  m_Color: {r: 0.10588236, g: 0.24313727, b: 0.16078432, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1413,7 +1413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.09233714, g: 0.23584908, b: 0.17548731, a: 1}
+  m_Color: {r: 0.10588236, g: 0.24313727, b: 0.16078432, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1488,7 +1488,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.2901961, g: 0.42352945, b: 0.25882354, a: 1}
+  m_Color: {r: 0.14509805, g: 0.28627452, b: 0.1764706, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1557,10 +1557,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Life
       objectReference: {fileID: 0}
-    - target: {fileID: 4563296334103207393, guid: 0062553f81bd5784e92e053fdec8f486, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0.20900011
-      objectReference: {fileID: 0}
     - target: {fileID: 4712613285901494738, guid: 0062553f81bd5784e92e053fdec8f486, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -1620,14 +1616,6 @@ PrefabInstance:
     - target: {fileID: 7761966636389931663, guid: 0062553f81bd5784e92e053fdec8f486, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8108711000789495903, guid: 0062553f81bd5784e92e053fdec8f486, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0.15899992
-      objectReference: {fileID: 0}
-    - target: {fileID: 8367072529162934681, guid: 0062553f81bd5784e92e053fdec8f486, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0.20900011
       objectReference: {fileID: 0}
     - target: {fileID: 8822794421229019991, guid: 0062553f81bd5784e92e053fdec8f486, type: 3}
       propertyPath: m_Pivot.x

@@ -32,7 +32,7 @@ public class SoundManager : MonoBehaviour
         instance = this;
     }
 
-    public void PlaySound (AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f, bool loop = false)
+    public void PlaySound (AudioClip clip, Vector3 position, float volume = 1f, float pitch = 1f, float spatialBlend = 0.5f, float distance = 10f, bool loop = false)
     {
         var source = GetFreeSource();
         ActivateSource(source);
@@ -43,7 +43,8 @@ public class SoundManager : MonoBehaviour
         source.volume = volume;
         source.pitch = pitch;
         source.loop = loop;
-        source.spatialBlend = 0.5f;
+        source.maxDistance = distance;
+        source.spatialBlend = spatialBlend;
 
         source.Play();
     }

@@ -334,6 +334,8 @@ MonoBehaviour:
     value: {fileID: 8300000, guid: 8a3cbf8e2e405a04490b07c70ca10820, type: 3}
   - key: DieSFX
     value: {fileID: 8300000, guid: 336cdf01c70ff5d4e99ca6fca40323b9, type: 3}
+  - key: Step
+    value: {fileID: 8300000, guid: 6b1949cc98f7c1746ba5b102fb0046ad, type: 3}
 --- !u!1 &1108405846323230892
 GameObject:
   m_ObjectHideFlags: 0
@@ -7601,6 +7603,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b7dfa7f66f9236e4d89fcec8c7bd6020, type: 3}
       insertIndex: -1
       addedObject: {fileID: 283388392579766911}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b7dfa7f66f9236e4d89fcec8c7bd6020, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6899170858424635969}
   m_SourcePrefab: {fileID: 100100000, guid: b7dfa7f66f9236e4d89fcec8c7bd6020, type: 3}
 --- !u!4 &8555310490502639704 stripped
 Transform:
@@ -7634,3 +7639,33 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6899170858424635969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9075106453087677154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 130f0e20306af7440b5c3b7df03e880d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationEvent
+  events:
+  - key: Step
+    item:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 4562509252599632308}
+          m_TargetAssemblyTypeName: EnemySkullSpider, Assembly-CSharp
+          m_MethodName: Step
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  stateEvents: []

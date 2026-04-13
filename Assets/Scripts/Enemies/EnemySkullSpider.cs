@@ -36,7 +36,10 @@ public class EnemySkullSpider : MonoBehaviour
         float factor = Mathf.Clamp01(Mathf.Max(Vector3.Dot(transform.forward, moveDirection.normalized) + 0.5f, 0.1f));
         locomotion.Move(moveDirection, factor);
     }
-
+    public void Step ()
+    {
+        sounds.PlaySound("Step", 0.2f, Random.Range(0.9f, 1.1f), 5f);
+    }
     public void Die(bool delay = true)
     {
         if (dead) return;
