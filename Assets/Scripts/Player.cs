@@ -7,6 +7,7 @@ public class Player : MonoBehaviour, IDynamicObject
 {
     private const float TIME_INVULNERABLE = 3f;
     private const float SPEED_KNOCKBACK = 7f;
+    private const float MAX_SLOPE = 0.9f;
     public static Player Instance { get; private set; }
 
     [Header("Physics")]
@@ -261,7 +262,7 @@ public class Player : MonoBehaviour, IDynamicObject
         {
             if (Physics.Raycast(bottomCenter + groundCheckPoints[i], Vector3.down, out r, distance, groundMask))
             {
-                if (r.normal.y > 0.75)
+                if (r.normal.y > MAX_SLOPE)
                     return (true, r.point, r.collider);
             }
         }
