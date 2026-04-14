@@ -9,11 +9,19 @@ public class PlayerCamera : MonoBehaviour
     private void FixedUpdate()
     {
         Vector3 newPos = Player.Instance.transform.position.FlattenY();
-        if (Player.Instance.IsGrounded) 
-            if (Mathf.Abs(Player.Instance.transform.position.y - heightTarget) > 0.9f)
-                heightTarget = Player.Instance.transform.position.y;
+        if (Camera.main.WorldToViewportPoint(Player.Instance.transform.position).y > 0.5f)
+        {
+            if (Player.Instance.IsGrounded)
+                if (Mathf.Abs(Player.Instance.transform.position.y - heightTarget) > 0.9f)
+                    heightTarget = Player.Instance.transform.position.y;
 
-        newPos.y = Mathf.MoveTowards(pos.y, heightTarget, heightVelocity * Time.fixedDeltaTime);
+            newPos.y = Mathf.MoveTowards(pos.y, heightTarget, heightVelocity * Time.fixedDeltaTime);
+        }
+        else
+        {
+            heightTarget = Player.Instance.transform.position.y;
+            newPos.y = heightTarget;
+        }
         pos = newPos;
 
         transform.position = pos;

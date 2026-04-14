@@ -2,6 +2,9 @@ using UnityEngine;
 
 public static class GameDefinitions
 {
+    public const int EXECUTION_ORDER_MOVING_SURFACE = -2;
+    public const int EXECUTION_ORDER_PLAYER = -1;
+
     public const string LAYER_STATICSOLID = "StaticSolid";
     public const string LAYER_DYNAMICSOLID = "DynamicSolid";
     public const string LAYER_COLLISIONONLY = "CollisionOnly";

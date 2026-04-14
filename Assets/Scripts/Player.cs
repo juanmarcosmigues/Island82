@@ -1,13 +1,17 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using static CombatHandler;
 
+[DefaultExecutionOrder(GameDefinitions.EXECUTION_ORDER_PLAYER)]
 public class Player : MonoBehaviour, IDynamicObject
 {
     private const float TIME_INVULNERABLE = 3f;
     private const float SPEED_KNOCKBACK = 7f;
-    private const float MAX_SLOPE = 0.9f;
+    private const float HEAVY_FALL_VELOCITY = 17f;
+    private const float SINK_HEIGHT = 0.7f;
     public static Player Instance { get; private set; }
 
     [Header("Physics")]
@@ -26,38 +30,49 @@ public class Player : MonoBehaviour, IDynamicObject
     public Transform renderRoot;
     public ParticleSystem dust;
     public VisualFeedback vfGetCoin;
+    public Transform dirtHole;
 
     [HideInInspector] public PlayerInput input;
-    [HideInInspector] public BoxCollider coll;
+    [HideInInspector] public Collider coll;
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public CombatHandler combatHandler;
     [HideInInspector] public ObjectSounds sounds;
+    [HideInInspector] public CheckGround groundChecker;
 
     public event System.Action<int> OnPickUpCoin;
     public event System.Action OnGroundedStart;
     public event System.Action<int> OnGetHurt;
 
+    private List<IInteractable> availableInteractions = new();
+
+    public bool PlayerInControl { get; set; } = true;
     public int CurrentLife { get; private set; } = 5;
     public bool Invulnerable { get; private set; } = false;
 
     Timestamp gotHitTimer;
     Coroutine invulnerableBlinkCoroutine;
 
+    public Bounds NextFrameBounds => nextFrameBounds;
     public Bounds? MaxAirBounds { get; private set; }
     public float VerticalVelocity {  get; private set; }
     public bool IsGrounded {  get; private set; }
+    public bool IsHeavyFalling { get; private set; }
+    public bool Sunk => sunkValue > 0f;
 
     Vector3 lookDirection;
     Timestamp pressedJumpTimer;
 
-    Vector3[] groundCheckPoints;
     float currentJumpForce;
     Vector3 lastVelocity;
     bool grounded;
-    Vector3 ground;
     float jumpValue;
     Vector3 checkpoint;
     MovingSurface movingSurface;
+    SurfaceProperties surfaceProperties;
+    GroundData? groundData;
+    float sunkValue;
+    Vector3 sunkPosition;
+    Bounds nextFrameBounds;
 
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
@@ -70,24 +85,17 @@ public class Player : MonoBehaviour, IDynamicObject
         Instance = this;
 
         rb = GetComponent<Rigidbody>();
-        coll = GetComponent<BoxCollider>();
+        coll = GetComponent<Collider>();
         input = GetComponent<PlayerInput>();
         combatHandler = GetComponent<CombatHandler>();
         sounds = GetComponent<ObjectSounds>();
+        groundChecker = GetComponent<CheckGround>();
     }
     private void Start()
     {
-        groundCheckPoints = new Vector3[]
-        {
-            new Vector3(0,0,0),
-            new Vector3(coll.size.x, 0, coll.size.z) * 0.5f,
-            new Vector3(-coll.size.x, 0, coll.size.z) * 0.5f,
-            new Vector3(-coll.size.x, 0, -coll.size.z) * 0.5f,
-            new Vector3(coll.size.x, 0, -coll.size.z) * 0.5f,
-        };
-
         input.GetButton("ButtonSouth").onPressedDown += PressJump;
         input.GetButton("ButtonSouth").onRelease += ReleaseJump;
+        input.GetButton("ButtonWest").onPressedDown += PressInteract;
         input.onMovementAxisMove += MoveAxis;
 
         combatHandler.OnGetHit += GetHit;
@@ -123,8 +131,25 @@ public class Player : MonoBehaviour, IDynamicObject
         Shader.SetGlobalVector("_PlayerPosition", transform.position);
     }
 
+    private void PressInteract()
+    {
+        string interactables = "Interactions List: \n";
+        availableInteractions.ForEach(x => interactables += x.InteractionName + "\n");
+        Debug.Log(interactables);
+        if (availableInteractions.Count > 0) 
+        {
+            var interactionIndex = availableInteractions.Count-1;
+            var interaction = availableInteractions.Last();
+            interaction.Interact();
+
+            if (interaction.Consumable)
+                availableInteractions.RemoveAt(interactionIndex);
+        }
+    }
     private void PressJump ()
     {
+        if (!PlayerInControl) return;
+
         if (grounded)
         {
             Jump(jumpImpulse);
@@ -140,6 +165,9 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     private void MoveAxis (Vector2 input, float val)
     {
+        if (!PlayerInControl) return;
+        if (Sunk) return;
+
         Vector3 dir = Camera.main.RotateTowardsCamera(input).normalized;
         lookDirection = dir;
         if (val > 0.1f) Move(dir, val);
@@ -164,6 +192,12 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     public void Jump(float impulse, bool ignoreGrounded = false)
     {
+        if (Sunk)
+        {
+            UnSink();
+            return;
+        } 
+        
         if (grounded || ignoreGrounded)
         {
             currentJumpForce = impulse;
@@ -187,29 +221,34 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     private void FixedUpdate()
     {
-        (bool found, Vector3 point, Collider coll) newGrounded = 
-            verticalVelocity.y <= 0f ? CheckGrounded() : (false, Vector3.zero, null);
-
-        if (newGrounded.found != grounded)
+        //Grounded Step ----------------------------->
+        bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
+        if (newGrounded != grounded)
         {
             movingSurface = null;
-            if (newGrounded.found)
+            groundData = null;
+
+            if (newGrounded)
             {
-                movingSurface = newGrounded.coll.GetComponent<MovingSurface>();
-                Land(newGrounded.coll, newGrounded.point);
+                var surface = groundChecker.GroundData.coll.GetComponent<SurfaceProperties>();
+                if ((surface != null && surface.CanLand()) || surface == null)
+                    Land(groundChecker.GroundData, surface);
+                else if (surface != null)
+                    newGrounded = false;
             }
         }
-        grounded = newGrounded.found;
-        ground = newGrounded.point;
+        grounded = newGrounded;
 
+        //Velocity Step ----------------------------->
         Vector3 velocity = Vector3.zero;
         
         if (grounded) 
             verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
         else 
             verticalVelocity += (lastVelocity.y < 1f ? downwardsGravity : upwardsGravity) * Vector3.up * Time.fixedDeltaTime;
+        
         if (verticalVelocity.y <= 0f && grounded)
-            rb.MovePosition(rb.position + (ground.y - coll.bounds.min.y) * Vector3.up); //snap
+            rb.MovePosition(rb.position + (groundData.Value.point.y - coll.bounds.min.y) * Vector3.up); //snap
 
         if (grounded)
         {
@@ -220,6 +259,9 @@ public class Player : MonoBehaviour, IDynamicObject
         {
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, airDrag * Time.fixedDeltaTime);
         }
+
+        if (!grounded && verticalVelocity.y < -HEAVY_FALL_VELOCITY)
+            IsHeavyFalling = true;
 
         velocity += verticalVelocity;
         velocity += moveVelocity;
@@ -234,10 +276,18 @@ public class Player : MonoBehaviour, IDynamicObject
         if (movingSurface)
             rb.MovePosition(rb.position + movingSurface.GetFinalFrameTranslation(feetPosition));
 
+        if (Sunk)
+        {
+            velocity = Vector3.zero;
+            moveVelocity = Vector3.zero;
+            horizontalVelocity = Vector3.zero;
+            verticalVelocity = Vector3.zero;
+        }
+
         rb.linearVelocity = velocity;
         
+        //Caches ---------------------------------------------->
         lastVelocity = velocity;
-
         if (grounded)
         {
             MaxAirBounds = null;
@@ -250,30 +300,24 @@ public class Player : MonoBehaviour, IDynamicObject
             MaxAirBounds = coll.bounds.center.y > MaxAirBounds.Value.center.y 
                 ? coll.bounds : MaxAirBounds.Value;
         }
+
+        nextFrameBounds = coll.bounds;
+        nextFrameBounds.center += rb.linearVelocity * Time.fixedDeltaTime;
     }
-    private (bool, Vector3, Collider) CheckGrounded ()
+    void Land (GroundData ground, SurfaceProperties surface)
     {
-        RaycastHit r;
-        float padding = 0.01f;
-        Vector3 bottomCenter = transform.position + coll.center - Vector3.up * coll.size.y * 0.5f;
-        bottomCenter += Vector3.up * padding;
-        float distance = padding * 2f + -lastVelocity.y * Time.fixedDeltaTime;
-        for (int i = 0; i < groundCheckPoints.Length; i++)
+        groundData = groundChecker.GroundData;
+        checkpoint = transform.position;
+        surfaceProperties = surface;
+        movingSurface = groundData.Value.coll.GetComponent<MovingSurface>();
+
+
+        if (IsHeavyFalling)
         {
-            if (Physics.Raycast(bottomCenter + groundCheckPoints[i], Vector3.down, out r, distance, groundMask))
-            {
-                if (r.normal.y > MAX_SLOPE)
-                    return (true, r.point, r.collider);
-            }
+            Sink(surface, ground);
+            IsHeavyFalling = false;
         }
 
-        return (false, Vector3.zero, null);
-    }
-    void Land (Collider coll, Vector3 point)
-    {
-        checkpoint = transform.position;
-
-        var surface = coll.GetComponent<SurfaceProperties>();
         string sound = "StepRock";
         if (surface != null)
         {
@@ -323,9 +367,52 @@ public class Player : MonoBehaviour, IDynamicObject
 
         OnGetHurt?.Invoke(damage);
     }
-    public void EnteredVoid ()
+    public void OutOfBounds ()
     {
         GetHit(null, 1, Weight.Light, "Fall", false);
         transform.position = checkpoint;      
+    }
+    public void Sink  (SurfaceProperties surface, GroundData ground)
+    {
+        sunkValue = 1f;
+        rb.isKinematic = true;
+        directionRoot.localPosition = -SINK_HEIGHT * Vector3.up;
+        dirtHole.gameObject.SetActive(true);
+
+        sunkPosition = transform.position;
+        sunkPosition.y = ground.point.y;
+
+        dirtHole.transform.rotation = Quaternion.LookRotation(directionRoot.forward, ground.normal);
+        //dirtHole.transform.position = sunkPosition;
+
+        MainCameraShaker.instance.Shake(0.2f, 0.3f, 0.2f);
+    }
+    public void UnSink ()
+    {
+        sunkValue -= 0.3f;
+        directionRoot.localPosition = -SINK_HEIGHT * sunkValue * Vector3.up;
+        dirtHole.gameObject.SetActive(false);
+
+        if (sunkValue <= 0.1f)
+        {
+            sunkValue = 0f;
+            directionRoot.localPosition = Vector3.zero;
+            rb.isKinematic = false;
+            Jump(jumpImpulse * 0.5f);         
+        }
+        else
+        {
+            dirtHole.gameObject.SetActive(true);
+        }
+    }
+    public void AddInteraction (IInteractable interactable)
+    {
+        Debug.Log("Added interaction:" + interactable.InteractionName);
+        availableInteractions.Add(interactable);
+    }
+    public void RemoveInteraction (IInteractable interactable)
+    {
+        Debug.Log("Removed interaction:" + interactable.InteractionName);
+        availableInteractions.Remove(interactable);
     }
 }

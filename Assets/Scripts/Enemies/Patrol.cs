@@ -17,6 +17,10 @@ public class Patrol
         direction = followPathDirection ? 1 : -1;
     }
 
+    public void SetNextPointByPosition (Vector3 position)
+    {
+        currentIndex = path.GetClosestForwardIndex(position, direction);
+    }
     public Vector3 GetTargetDirection (Vector3 position)
     {
         if (path == null || path.Count == 0) return Vector3.zero;

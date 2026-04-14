@@ -30,6 +30,11 @@ public class EnemySkullSpider : MonoBehaviour
         jumpOn.OnJumpedOn += _ => Die(true);
     }
 
+    private void Start()
+    {
+        patrol.SetNextPointByPosition(transform.position);
+    }
+
     private void Update()
     {
         Vector3 moveDirection = patrol.GetTargetDirection(transform.position);

@@ -19,8 +19,8 @@ public class RigidbodyRadialExplosion : MonoBehaviour
 
         foreach (var part in parts)
         {
-            part.linearVelocity = part.transform.localPosition.normalized * force;
-            part.angularVelocity = Vector3.Cross(part.transform.localPosition.normalized, Vector3.up).normalized * torque;
+            part.linearVelocity = -part.transform.localPosition.normalized * force;
+            part.angularVelocity = Vector3.Cross(-part.transform.localPosition.normalized, Vector3.up).normalized * torque;
         }
 
         StartCoroutine(CheckForSleep());

@@ -49,6 +49,40 @@ public class LocomotionPath : MonoBehaviour
         return flip ? Count - 1 : 0;
     }
 
+    public int GetClosestForwardIndex(Vector3 position, int direction)
+    {
+        if (Count == 0) return 0;
+        if (Count == 1) return 0;
+
+        // Find the absolute closest waypoint
+        int closestIdx = 0;
+        float closestDistSq = float.MaxValue;
+        for (int i = 0; i < Count; i++)
+        {
+            float d = (GetPoint(i) - position).sqrMagnitude;
+            if (d < closestDistSq)
+            {
+                closestDistSq = d;
+                closestIdx = i;
+            }
+        }
+
+        // Determine the forward segment from that waypoint
+        int dirCopy = direction;
+        int nextIdx = GetNextIndex(closestIdx, ref dirCopy);
+        Vector3 closestPt = GetPoint(closestIdx);
+        Vector3 segment = GetPoint(nextIdx) - closestPt;
+
+        // If the position has already passed the closest waypoint along the
+        // segment direction, the waypoint is "behind" us — target the next one.
+        if (segment.sqrMagnitude > 0.0001f &&
+            Vector3.Dot(position - closestPt, segment) > 0f)
+        {
+            return nextIdx;
+        }
+
+        return closestIdx;
+    }
     private void OnDrawGizmos()
     {
         int count = Count;

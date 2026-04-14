@@ -4,9 +4,12 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
-public class UIDialogueBox : MonoBehaviour
+public class UIDialogueBox : MonoBehaviour, IInteractable
 {
     public static UIDialogueBox Instance { get; private set; }
+
+    public bool Consumable => true;
+    public string InteractionName => "Dialogue Box Next";
 
     public TextMeshProUGUI textComponentHeader;
     public TextMeshProUGUI textComponentBody;
@@ -39,28 +42,42 @@ public class UIDialogueBox : MonoBehaviour
     }
     private void OnEnable()
     {
-        uiInput.GetButton("ButtonSouth").onPressedDown += PressNext;
+        //uiInput.GetButton("ButtonSouth").onPressedDown += PressNext;
         textComponentHeader.text = "";
         textComponentBody.text = "";
         marker.gameObject.SetActive(false);
     }
     private void OnDisable()
     {
-        uiInput.GetButton("ButtonSouth").onPressedDown -= PressNext;
+        //uiInput.GetButton("ButtonSouth").onPressedDown -= PressNext;
     }
-    public virtual void Show (params (string header, string body)[] texts)
+    public virtual void Show(params Dialogue[] texts)
     {
         steps = new();
-        texts.ForEach(t => { steps.Add(() => Show(t.header, t.body)); });
+        texts.ForEach(t => { steps.Add(() => Show(t.header, t.body, t.aligment)); });
         steps.Add(() => Hide());
         Next();
     }
-    public virtual void Show (string header, string body)
+    public virtual void Show (params (string header, string body)[] texts)
+    {
+        Dialogue[] dialogues = new Dialogue[texts.Length];
+        for (int i = 0; i < texts.Length; i++)
+        {
+            dialogues[i].body = texts[i].body;
+            dialogues[i].header = texts[i].header;
+            dialogues[i].aligment = TextAlignmentOptions.TopJustified;
+        }
+
+        Show(dialogues);
+    }
+    public virtual void Show (string header, string body, TextAlignmentOptions aligment)
     {
         goalBody = body;
         goalHeader = header;
         currentText = "";
         currentTime = 0f;
+        textComponentBody.alignment = aligment;
+        textComponentHeader.alignment = aligment;
 
         Show();
     }
@@ -68,8 +85,8 @@ public class UIDialogueBox : MonoBehaviour
     {
         gameObject.SetActive(true);
 
-        if (Player.Instance != null) 
-            Player.Instance.input.inputEnabled = false;
+        if (Player.Instance != null)
+            Player.Instance.PlayerInControl = false;
 
         revealIndices = new();
         for (int i = 0; i < goalBody.Length; i++)
@@ -78,6 +95,7 @@ public class UIDialogueBox : MonoBehaviour
                 revealIndices.Add(i);
         }
 
+        textComponentHeader.gameObject.SetActive(goalHeader.Length > 0);
         textComponentHeader.text = goalHeader;
     }
     public void Hide ()
@@ -85,14 +103,7 @@ public class UIDialogueBox : MonoBehaviour
         gameObject.SetActive(false);
 
         if (Player.Instance != null)
-            Player.Instance.input.inputEnabled = true;
-    }
-    public void PressNext ()
-    {
-        if (Writing)
-            return;
-
-        Next();
+            Player.Instance.PlayerInControl = true;
     }
     void Next ()
     {
@@ -102,6 +113,9 @@ public class UIDialogueBox : MonoBehaviour
         steps.RemoveAt(0);
 
         marker.sprite = steps.Count > 1 ? markerSprites[0] : markerSprites[1];
+
+        if (steps.Count > 0)
+            Player.Instance.AddInteraction(this);
     }
     private void Update()
     {
@@ -125,5 +139,13 @@ public class UIDialogueBox : MonoBehaviour
             if (!marker.gameObject.activeSelf)
                 marker.gameObject.SetActive(true);
         }
+    }
+
+    public void Interact()
+    {
+        if (Writing)
+            return;
+
+        Next();
     }
 }

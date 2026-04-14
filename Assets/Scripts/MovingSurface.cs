@@ -1,9 +1,8 @@
 using UnityEngine;
 
-[DefaultExecutionOrder(MOVING_SURFACE_EXECUTION_ORDER)]
+[DefaultExecutionOrder(GameDefinitions.EXECUTION_ORDER_MOVING_SURFACE)]
 public class MovingSurface : MonoBehaviour
 {
-    public const int MOVING_SURFACE_EXECUTION_ORDER = -20;
 
     public Vector3 force => displacement;
     public Vector3 GetRotationForce(Vector3 worldPosition)
