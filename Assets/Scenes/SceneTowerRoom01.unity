@@ -2559,6 +2559,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 5015ee306ae9d9845adbaf24680d1aec, type: 2}
+    - target: {fileID: -4752641192416967256, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fcb6671b120fe1b48adb498a71ec0380, type: 2}
     - target: {fileID: -4419829042301610460, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -2675,10 +2679,18 @@ PrefabInstance:
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: -479253180160549515, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fcb6671b120fe1b48adb498a71ec0380, type: 2}
     - target: {fileID: -437699416530579825, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
       objectReference: {fileID: 0}
+    - target: {fileID: -312440336699128921, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fcb6671b120fe1b48adb498a71ec0380, type: 2}
     - target: {fileID: -271532971691212071, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -2807,6 +2819,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 5015ee306ae9d9845adbaf24680d1aec, type: 2}
+    - target: {fileID: 4698879961970640244, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: fcb6671b120fe1b48adb498a71ec0380, type: 2}
     - target: {fileID: 4752603030710126515, guid: 745fcc1055f450842b3d897e241c26ae, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
