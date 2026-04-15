@@ -5,7 +5,8 @@ using UnityEngine;
 public class LookAtOrthographicCamera : MonoBehaviour
 {
     public Camera target;
-    private void Awake()
+
+    private void OnEnable()
     {
         if (target == null)
             target = Camera.main;

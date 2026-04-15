@@ -14,5 +14,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scripts/Scene Controller/SceneTransition.unity
     guid: b73ba7539ed786b4ca6f8b01243b080f
+  - enabled: 1
+    path: Assets/Scenes/SceneTowerRoom01.unity
+    guid: 3cc9b5064858f0241bd5db6b13996f41
+  - enabled: 1
+    path: Assets/Scenes/SceneTowerRoom02.unity
+    guid: af1129a8ebae7f140ac070d1145252e6
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

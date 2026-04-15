@@ -10,7 +10,8 @@ public class Player : MonoBehaviour, IDynamicObject
 {
     private const float TIME_INVULNERABLE = 3f;
     private const float SPEED_KNOCKBACK = 7f;
-    private const float HEAVY_FALL_VELOCITY = 17f;
+    private const float MAX_GRAVITY = 16f;
+    private const float HEAVY_FALL_VELOCITY = 16f;
     private const float SINK_HEIGHT = 0.7f;
     public static Player Instance { get; private set; }
 
@@ -246,7 +247,9 @@ public class Player : MonoBehaviour, IDynamicObject
             verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
         else 
             verticalVelocity += (lastVelocity.y < 1f ? downwardsGravity : upwardsGravity) * Vector3.up * Time.fixedDeltaTime;
-        
+
+        verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
+
         if (verticalVelocity.y <= 0f && grounded)
             rb.MovePosition(rb.position + (groundData.Value.point.y - coll.bounds.min.y) * Vector3.up); //snap
 
@@ -260,7 +263,7 @@ public class Player : MonoBehaviour, IDynamicObject
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, airDrag * Time.fixedDeltaTime);
         }
 
-        if (!grounded && verticalVelocity.y < -HEAVY_FALL_VELOCITY)
+        if (!grounded && verticalVelocity.y <= -HEAVY_FALL_VELOCITY)
             IsHeavyFalling = true;
 
         velocity += verticalVelocity;
