@@ -8,19 +8,20 @@ public class GameplayManager : MonoBehaviour
     public float runTime;
 
     public event System.Action<int> OnAddCoins;
+    public event System.Action<Player, int> OnPlayerHurt;
 
     private void Awake()
     {
         Instance = this;
     }
-    void Start()
-    {
-        Player.Instance.OnPickUpCoin += AddCoins;
-    }
     public int GetRuntime()
     {
         return Mathf.FloorToInt(runTime);
     }
+    public void PlayerHurt(Player player, int damage)
+    {
+        OnPlayerHurt?.Invoke(player, damage);
+    }    
     public void AddCoins (int amount)
     {
         playerCurrency += amount;

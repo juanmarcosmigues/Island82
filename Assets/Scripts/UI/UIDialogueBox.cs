@@ -18,11 +18,11 @@ public class UIDialogueBox : MonoBehaviour, IInteractable
     public Sprite[] markerSprites;
     public AudioSource dialogueSound;
 
-    private string goalBody;
-    private string goalHeader;
-    protected string currentText;
-    protected float currentTime;
-    protected int currentCharacterAmount; 
+    private string goalBody = "";
+    private string goalHeader = "";
+    protected string currentText = "";
+    protected float currentTime = 0f;
+    protected int currentCharacterAmount = 0; 
     protected List<int> revealIndices;
     protected List<System.Action> steps;
     public bool Writing => currentText.Length < goalBody.Length;

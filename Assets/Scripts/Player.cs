@@ -40,9 +40,7 @@ public class Player : MonoBehaviour, IDynamicObject
     [HideInInspector] public ObjectSounds sounds;
     [HideInInspector] public CheckGround groundChecker;
 
-    public event System.Action<int> OnPickUpCoin;
     public event System.Action OnGroundedStart;
-    public event System.Action<int> OnGetHurt;
 
     private List<IInteractable> availableInteractions = new();
 
@@ -75,7 +73,7 @@ public class Player : MonoBehaviour, IDynamicObject
     float sunkValue;
     Vector3 sunkPosition;
     Bounds nextFrameBounds;
-    float upwardGravityModifier;
+    float bounceModifier;
 
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
@@ -185,7 +183,8 @@ public class Player : MonoBehaviour, IDynamicObject
         float pitch = Mathf.Lerp(0.9f, 1.2f, Mathf.Clamp01(pickUpCoinCombo));
         sounds.PlaySound("PickUp", 0.5f);
         pickUpCoinCombo += 0.15f;
-        OnPickUpCoin?.Invoke(1);
+
+        GameplayManager.Instance?.AddCoins(1);
     }
     public void InsideObject (bool inside)
     {
@@ -199,7 +198,7 @@ public class Player : MonoBehaviour, IDynamicObject
     public void BounceOff ()
     {
         bool perfectBounce = pressedJumpTimer.remainingTime > 0f;
-        upwardGravityModifier = perfectBounce ? 0.7f : 0.5f;
+        bounceModifier = perfectBounce ? 0.7f : 0.5f;
         float force = perfectBounce ? 13f : 11f;
         Jump(force, true);
 
@@ -258,7 +257,7 @@ public class Player : MonoBehaviour, IDynamicObject
         //Velocity Step ----------------------------->
         Vector3 velocity = Vector3.zero;
 
-        upwardGravityModifier = Mathf.Clamp01(upwardGravityModifier - Time.fixedDeltaTime);
+        bounceModifier = Mathf.Clamp01(bounceModifier - Time.fixedDeltaTime);
         
         if (grounded) 
             verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
@@ -266,7 +265,7 @@ public class Player : MonoBehaviour, IDynamicObject
             verticalVelocity += 
                 (lastVelocity.y < 1f ? 
                 downwardsGravity : 
-                upwardsGravity * (1-upwardGravityModifier)) 
+                upwardsGravity * (1 - bounceModifier)) 
                 * Vector3.up * Time.fixedDeltaTime;
 
         verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
@@ -281,6 +280,7 @@ public class Player : MonoBehaviour, IDynamicObject
         }
         else
         {
+            moveVelocity *= 1 + (bounceModifier * 0.6f);
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, airDrag * Time.fixedDeltaTime);
         }
 
@@ -389,7 +389,7 @@ public class Player : MonoBehaviour, IDynamicObject
                 horizontalVelocity += (transform.position - source.transform.position).FlattenY().normalized * knockbackForce;
         });
 
-        OnGetHurt?.Invoke(damage);
+        GameplayManager.Instance?.PlayerHurt(this, damage);
     }
     public void OutOfBounds ()
     {
