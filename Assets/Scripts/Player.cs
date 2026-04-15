@@ -46,6 +46,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
     private List<IInteractable> availableInteractions = new();
 
+    public bool PlayerRotation {  get; set; } = true;
     public bool PlayerInControl { get; set; } = true;
     public int CurrentLife { get; private set; } = 5;
     public bool Invulnerable { get; private set; } = false;
@@ -171,7 +172,10 @@ public class Player : MonoBehaviour, IDynamicObject
         if (Sunk) return;
 
         Vector3 dir = Camera.main.RotateTowardsCamera(input).normalized;
-        lookDirection = dir;
+
+        if (PlayerRotation)
+            lookDirection = dir;
+
         if (val > 0.1f) Move(dir, val);
         else Move(dir, 0f);
     }
@@ -198,6 +202,9 @@ public class Player : MonoBehaviour, IDynamicObject
         upwardGravityModifier = perfectBounce ? 0.7f : 0.5f;
         float force = perfectBounce ? 13f : 11f;
         Jump(force, true);
+
+        if (perfectBounce)
+            StartCoroutine(PerfectBounceAnimation(1f));
     }
     public void Jump(float impulse, bool ignoreGrounded = false)
     {
@@ -431,5 +438,28 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         Debug.Log("Removed interaction:" + interactable.InteractionName);
         availableInteractions.Remove(interactable);
+    }
+
+    IEnumerator PerfectBounceAnimation (float duration)
+    {
+        PlayerRotation = false;
+        float t = 0f;
+        float val = 0f;
+        Vector3 startRotation = lookDirection;
+
+        yield return null;
+
+        while (t < 1f && !grounded)
+        {
+            t = Mathf.Clamp01(t += Time.deltaTime/duration);
+            val = 1-Mathf.Pow(1-t, 2);
+
+            lookDirection = Quaternion.AngleAxis(val * 720f, Vector3.up) * startRotation;
+
+            yield return null;
+        }
+
+        lookDirection = startRotation;
+        PlayerRotation = true;
     }
 }
