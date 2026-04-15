@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class BounceOn : JumpOn
 {
-    public float jumpImpulse;
     public bool dontBounceOnHeavyFall;
     
     public Animation anim;
@@ -18,7 +17,7 @@ public class BounceOn : JumpOn
     public void Bounce ()
     {
         if (!Player.Instance.IsHeavyFalling || dontBounceOnHeavyFall)
-            Player.Instance.Jump(jumpImpulse, true);
+            Player.Instance.BounceOff();
 
         if (anim != null)
             anim.Play();

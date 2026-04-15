@@ -39,7 +39,7 @@ public class MovingPlatform : MonoBehaviour
                 Vector3 targetPosition = target ? fromPosition : toPosition;
                 target = !target;
 
-                while (rigidBody.position.SqrDistance(targetPosition) > 0.01f)
+                while (rigidBody.position.SqrDistance(targetPosition) > 0.001f)
                 {
                     rigidBody.MovePosition(Vector3.MoveTowards(rigidBody.position, targetPosition, moveSpeed * Time.fixedDeltaTime));
                     yield return new WaitForFixedUpdate();
@@ -53,5 +53,38 @@ public class MovingPlatform : MonoBehaviour
         finally
         {
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Vector3 a = from ? from.position : transform.position;
+        Vector3 b = to ? to.position : transform.position;
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(a, b);
+
+        // Arrow head
+        Vector3 dir = (b - a).normalized;
+        float arrowSize = 0.5f;
+
+        if (dir != Vector3.zero)
+        {
+            Vector3 right = Vector3.Cross(dir, Vector3.up).normalized;
+            if (right == Vector3.zero) right = Vector3.Cross(dir, Vector3.forward).normalized;
+
+            Vector3 arrowBase = b - dir * arrowSize;
+            Gizmos.DrawLine(b, arrowBase + right * arrowSize * 0.5f);
+            Gizmos.DrawLine(b, arrowBase - right * arrowSize * 0.5f);
+
+            Vector3 up = Vector3.Cross(dir, right).normalized;
+            Gizmos.DrawLine(b, arrowBase + up * arrowSize * 0.5f);
+            Gizmos.DrawLine(b, arrowBase - up * arrowSize * 0.5f);
+        }
+
+        // Mark endpoints
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(a, 0.15f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(b, 0.15f);
     }
 }

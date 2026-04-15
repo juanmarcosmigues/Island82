@@ -74,6 +74,7 @@ public class Player : MonoBehaviour, IDynamicObject
     float sunkValue;
     Vector3 sunkPosition;
     Bounds nextFrameBounds;
+    float upwardGravityModifier;
 
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
@@ -191,6 +192,13 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         moveVelocity = dir * factor * moveSpeed;
     }
+    public void BounceOff ()
+    {
+        bool perfectBounce = pressedJumpTimer.remainingTime > 0f;
+        upwardGravityModifier = perfectBounce ? 0.7f : 0.5f;
+        float force = perfectBounce ? 13f : 11f;
+        Jump(force, true);
+    }
     public void Jump(float impulse, bool ignoreGrounded = false)
     {
         if (Sunk)
@@ -242,11 +250,17 @@ public class Player : MonoBehaviour, IDynamicObject
 
         //Velocity Step ----------------------------->
         Vector3 velocity = Vector3.zero;
+
+        upwardGravityModifier = Mathf.Clamp01(upwardGravityModifier - Time.fixedDeltaTime);
         
         if (grounded) 
             verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
         else 
-            verticalVelocity += (lastVelocity.y < 1f ? downwardsGravity : upwardsGravity) * Vector3.up * Time.fixedDeltaTime;
+            verticalVelocity += 
+                (lastVelocity.y < 1f ? 
+                downwardsGravity : 
+                upwardsGravity * (1-upwardGravityModifier)) 
+                * Vector3.up * Time.fixedDeltaTime;
 
         verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
 

@@ -292,7 +292,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.54, y: 0.54, z: 0.54}
+  m_Size: {x: 0.7, y: 0.7, z: 0.7}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6338885815797820677
 MonoBehaviour:
@@ -307,7 +307,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BounceOn
   trigger: {fileID: 6884835115668877403}
-  jumpImpulse: 12
+  onlyHeavyFall: 0
+  debug: 0
+  dontBounceOnHeavyFall: 0
   anim: {fileID: 0}
   vfb: {fileID: 0}
 --- !u!114 &5084705276664470718
@@ -387,7 +389,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.57, y: 0.6535328, z: 0.57}
+  m_Size: {x: 0.74, y: 0.74, z: 0.74}
   m_Center: {x: 0, y: 0.011766404, z: 0}
 --- !u!1 &3537977293530029205
 GameObject:
@@ -646,8 +648,8 @@ Transform:
   m_GameObject: {fileID: 5358198363459763546}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.2786901, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0.00097108, y: 0.27876, z: 0.00041294}
+  m_LocalScale: {x: 1.1945, y: 1.1945, z: 1.1945}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6566697127271721125}
