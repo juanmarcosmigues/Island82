@@ -25,6 +25,7 @@ Shader "Aftersun/Vertex Color Dark Room"
             struct appdata
             {
                 float4 vertex : POSITION;
+                float3 normal : NORMAL;
                 float3 col : COLOR;
             };
 
@@ -32,6 +33,7 @@ Shader "Aftersun/Vertex Color Dark Room"
             {
                 float3 col : COLOR;
                 float3 worldPos : TEXCOORD0;
+                float3 normal : NORMAL;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
@@ -55,7 +57,8 @@ Shader "Aftersun/Vertex Color Dark Room"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
-                //o.vertex = VertexWiggle(v.vertex);
+                o.normal = v.normal;
+
                 o.col = v.col;
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
@@ -67,8 +70,9 @@ Shader "Aftersun/Vertex Color Dark Room"
                 float2 screenPos = i.vertex.xy;
                 uint2 pixel = uint2(screenPos) % 4;
                 float threshold = bayerMatrix[pixel.x][pixel.y];
-
-                float dist = length(i.worldPos - _PlayerPosition);
+                float3 delta = i.worldPos - _PlayerPosition;
+                float facing = dot(normalize(delta), i.normal);
+                float dist = length(delta);
 
                 // Base lit color
                 fixed4 col = (1,1,1,1);
