@@ -270,8 +270,8 @@ public class Player : MonoBehaviour, IDynamicObject
 
         verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
 
-        if (verticalVelocity.y <= 0f && grounded)
-            rb.MovePosition(rb.position + (groundData.Value.point.y - coll.bounds.min.y) * Vector3.up); //snap
+        //if (verticalVelocity.y <= 0f && grounded)
+        //    rb.MovePosition(rb.position + (groundData.Value.point.y - coll.bounds.min.y) * Vector3.up); //snap
 
         if (grounded)
         {
@@ -297,9 +297,6 @@ public class Player : MonoBehaviour, IDynamicObject
         Vector3 feetPosition = rb.position;
         feetPosition.y = coll.bounds.min.y;
 
-        if (movingSurface)
-            rb.MovePosition(rb.position + movingSurface.GetFinalFrameTranslation(feetPosition));
-
         if (Sunk)
         {
             velocity = Vector3.zero;
@@ -307,6 +304,9 @@ public class Player : MonoBehaviour, IDynamicObject
             horizontalVelocity = Vector3.zero;
             verticalVelocity = Vector3.zero;
         }
+
+        if (movingSurface)
+            velocity += movingSurface.GetFinalFrameTranslation(feetPosition) / Time.fixedDeltaTime;
 
         rb.linearVelocity = velocity;
         
