@@ -54,7 +54,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
     public Bounds NextFrameBounds => nextFrameBounds;
     public Bounds? MaxAirBounds { get; private set; }
-    public float VerticalVelocity {  get; private set; }
+    public float VerticalVelocity => verticalVelocity.y;
     public bool IsGrounded {  get; private set; }
     public bool IsHeavyFalling { get; private set; }
     public bool Sunk => sunkValue > 0f;
@@ -253,25 +253,30 @@ public class Player : MonoBehaviour, IDynamicObject
             }
         }
         grounded = newGrounded;
+        groundData = groundChecker.GroundData;
 
         //Velocity Step ----------------------------->
         Vector3 velocity = Vector3.zero;
+        Vector3 addedPosition = Vector3.zero;
 
         bounceModifier = Mathf.Clamp01(bounceModifier - Time.fixedDeltaTime);
-        
-        if (grounded) 
+
+        if (grounded)
+        {
             verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
-        else 
-            verticalVelocity += 
-                (lastVelocity.y < 1f ? 
-                downwardsGravity : 
-                upwardsGravity * (1 - bounceModifier)) 
+        }
+        else
+        {
+            verticalVelocity +=
+                (lastVelocity.y < 1f ?
+                downwardsGravity :
+                upwardsGravity * (1 - bounceModifier))
                 * Vector3.up * Time.fixedDeltaTime;
 
-        verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
+            Debug.Log("adding gravity");
+        }
 
-        //if (verticalVelocity.y <= 0f && grounded)
-        //    rb.MovePosition(rb.position + (groundData.Value.point.y - coll.bounds.min.y) * Vector3.up); //snap
+        verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
 
         if (grounded)
         {
@@ -292,10 +297,6 @@ public class Player : MonoBehaviour, IDynamicObject
         velocity += horizontalVelocity;
 
         IsGrounded = grounded;
-        VerticalVelocity = verticalVelocity.y;
-
-        Vector3 feetPosition = rb.position;
-        feetPosition.y = coll.bounds.min.y;
 
         if (Sunk)
         {
@@ -305,11 +306,21 @@ public class Player : MonoBehaviour, IDynamicObject
             verticalVelocity = Vector3.zero;
         }
 
-        if (movingSurface)
-            velocity += movingSurface.GetFinalFrameTranslation(feetPosition) / Time.fixedDeltaTime;
+        Vector3 nextPosition = rb.position + velocity * Time.fixedDeltaTime;
+        Vector3 nextFeetPosition = nextPosition - coll.bounds.extents.y * Vector3.up;
+        if (grounded)
+        {
+            //Ground Snap
+            if (verticalVelocity.y <= 0f)
+                addedPosition += (groundData.Value.point.y - nextFeetPosition.y) * Vector3.up;
+            if (movingSurface)
+                addedPosition += movingSurface.GetFinalFrameTranslation(transform.position);
+        }
+
+        velocity += addedPosition / Time.fixedDeltaTime;
 
         rb.linearVelocity = velocity;
-        
+
         //Caches ---------------------------------------------->
         lastVelocity = velocity;
         if (grounded)
@@ -461,5 +472,36 @@ public class Player : MonoBehaviour, IDynamicObject
 
         lookDirection = startRotation;
         PlayerRotation = true;
+    }
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying) return;
+
+        Vector3 origin = transform.position + Vector3.up * 0.5f;
+
+        DrawArrow(origin, horizontalVelocity, Color.red);    // Horizontal (knockback / external)
+        DrawArrow(origin, moveVelocity, Color.green);  // Move (player input)
+        DrawArrow(origin, verticalVelocity, Color.blue);   // Vertical (gravity / jump)
+        DrawArrow(origin, lastVelocity, Color.white);   // Vertical (gravity / jump)
+    }
+
+    private void DrawArrow(Vector3 origin, Vector3 vector, Color color, float headSize = 0.25f, float headAngle = 20f)
+    {
+        if (vector.sqrMagnitude < 0.0001f) return;
+
+        Gizmos.color = color;
+        Vector3 tip = origin + vector;
+        Gizmos.DrawLine(origin, tip);
+
+        Quaternion rot = Quaternion.LookRotation(vector.normalized);
+        Vector3 right = rot * Quaternion.Euler(0f, 180f + headAngle, 0f) * Vector3.forward;
+        Vector3 left = rot * Quaternion.Euler(0f, 180f - headAngle, 0f) * Vector3.forward;
+        Vector3 up = rot * Quaternion.Euler(180f + headAngle, 0f, 0f) * Vector3.forward;
+        Vector3 down = rot * Quaternion.Euler(180f - headAngle, 0f, 0f) * Vector3.forward;
+
+        Gizmos.DrawLine(tip, tip + right * headSize);
+        Gizmos.DrawLine(tip, tip + left * headSize);
+        Gizmos.DrawLine(tip, tip + up * headSize);
+        Gizmos.DrawLine(tip, tip + down * headSize);
     }
 }

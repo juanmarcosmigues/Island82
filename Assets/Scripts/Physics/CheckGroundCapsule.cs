@@ -93,7 +93,7 @@ public class CheckGroundCapsuleCollider : CheckGround
                     bottomCenter + raycastLocalOrigin - Vector3.up * checkOffset,
                     Vector3.down,
                     out hit,
-                    radius,
+                    radius + velocityExtension,
                     groundMask
                     ))
                 {
