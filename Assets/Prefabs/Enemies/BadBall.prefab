@@ -247,7 +247,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.4, y: 0.45, z: 0.4}
+  m_Size: {x: 0.35, y: 0.4, z: 0.35}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3909636594148712872
 MonoBehaviour:
@@ -310,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c74d776cebfa18b419af218325b131ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Locomotion
-  speed: 0
+  speed: 2
   gravity: -10
   drag: 1
   airDrag: 1
@@ -512,12 +512,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fccc28b8f1295b469c3398dd66df96f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHitbox
-  hitboxTag: 
+  hitboxTag: Badball
   weight: 0
   damage: 1
   hitMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1024
 --- !u!135 &6250190235833857228
 SphereCollider:
   m_ObjectHideFlags: 0

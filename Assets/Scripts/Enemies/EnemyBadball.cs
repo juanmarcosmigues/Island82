@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class EnemyBadBall : MonoBehaviour
 {
+    public float radius;
     public float jumpHeight;
     public Transform root;
     public Transform dieVFXs;
@@ -28,20 +29,21 @@ public class EnemyBadBall : MonoBehaviour
         jumpOn.OnJumpedOn += _ => Die(true);
         locomotion.OnLand += Bounce;
     }
-    private void Start()
-    {
-        StartCoroutine(Behaviour());
-    }
     void Bounce(GroundData ground)
     {
         locomotion.Jump(jumpHeight);
     }
-    IEnumerator Behaviour ()
+    private void Update()
     {
-        yield return null;
+        Vector3 moveDirection = (Player.Instance.transform.position - transform.position).FlattenY().normalized;
+        float factor = Mathf.Clamp01(Mathf.Max(Vector3.Dot(transform.forward, moveDirection.normalized) + 0.5f, 0.1f));
+        locomotion.Move(moveDirection, factor);
     }
     public void Die(bool delay = true)
     {
+        Debug.Log("die");
+        locomotion.KillVerticalVelocity();
+        return;
         if (dead) return;
         dead = true;
 

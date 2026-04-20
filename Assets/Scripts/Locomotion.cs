@@ -111,4 +111,9 @@ public class Locomotion : MonoBehaviour
     {
         verticalVelocity = Vector3.up * force;
     }
+
+    public void KillVerticalVelocity ()
+    {
+        verticalVelocity = Vector3.zero;
+    }
 }
