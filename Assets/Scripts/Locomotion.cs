@@ -1,3 +1,4 @@
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 
 public class Locomotion : MonoBehaviour
@@ -12,6 +13,8 @@ public class Locomotion : MonoBehaviour
     private new Collider collider;
     private CheckGround groundChecker;
 
+    public System.Action <GroundData> OnLand;
+
     bool tickedMove;
 
     bool grounded;
@@ -20,6 +23,7 @@ public class Locomotion : MonoBehaviour
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
     Vector3 horizontalVelocity;
+    GroundData? groundData;
     MovingSurface movingSurface;
 
     void Awake()
@@ -35,6 +39,7 @@ public class Locomotion : MonoBehaviour
         if (newGrounded != grounded)
         {
             movingSurface = null;
+            groundData = null;
             if (newGrounded)
             {
                 movingSurface = groundChecker.GroundData.coll.GetComponent<MovingSurface>();
@@ -42,9 +47,11 @@ public class Locomotion : MonoBehaviour
             }
         }
         grounded = newGrounded;
+        groundData = groundChecker.GroundData;
 
         //Velocity Step ----------------------------->
         Vector3 velocity = Vector3.zero;
+        Vector3 addedPosition = Vector3.zero;
 
         if (!tickedMove) 
             moveVelocity = Vector3.zero;
@@ -53,9 +60,6 @@ public class Locomotion : MonoBehaviour
             verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
         else
             verticalVelocity += gravity * Vector3.up * Time.fixedDeltaTime;
-
-        if (verticalVelocity.y <= 0f && grounded)
-            rigidBody.MovePosition(rigidBody.position + (groundChecker.GroundData.point.y - collider.bounds.min.y) * Vector3.up); //snap
 
         if (grounded)
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, drag * Time.fixedDeltaTime);
@@ -66,11 +70,18 @@ public class Locomotion : MonoBehaviour
         velocity += moveVelocity;
         velocity += horizontalVelocity;
 
-        Vector3 feetPosition = rigidBody.position;
-        feetPosition.y = collider.bounds.min.y;
+        Vector3 nextPosition = rigidBody.position + velocity * Time.fixedDeltaTime;
+        Vector3 nextFeetPosition = nextPosition - collider.bounds.extents.y * Vector3.up;
+        if (grounded)
+        {
+            //Ground Snap
+            if (verticalVelocity.y <= 0f)
+                addedPosition += (groundData.Value.point.y - nextFeetPosition.y) * Vector3.up;
+            if (movingSurface)
+                addedPosition += movingSurface.GetFinalFrameTranslation(transform.position);
+        }
 
-        if (movingSurface)
-            rigidBody.MovePosition(rigidBody.position + movingSurface.GetFinalFrameTranslation(feetPosition));
+        velocity += addedPosition / Time.fixedDeltaTime;
 
         rigidBody.linearVelocity = velocity;
         lastVelocity = velocity;
@@ -88,12 +99,16 @@ public class Locomotion : MonoBehaviour
     }
     void Land (GroundData ground)
     {
-
+        OnLand?.Invoke(ground);
     }
 
     public void Move(Vector3 direction, float factor = 1f)
     {
         moveVelocity = direction * speed * factor;
         tickedMove = true;
+    }
+    public void Jump(float force)
+    {
+        verticalVelocity = Vector3.up * force;
     }
 }
