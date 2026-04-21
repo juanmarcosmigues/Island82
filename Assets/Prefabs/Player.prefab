@@ -454,7 +454,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 192
-  maxGroundAngle: 15
+  maxGroundAngle: 20
   autoCheck: 0
   debug: 1
   checkOffset: 0.1
@@ -686,7 +686,7 @@ MonoBehaviour:
   maxDistance: 7.5
   shadowMask:
     serializedVersion: 2
-    m_Bits: 65
+    m_Bits: 449
 --- !u!1 &9146467395805375272
 GameObject:
   m_ObjectHideFlags: 0

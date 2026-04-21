@@ -24,7 +24,7 @@ public class ObjectShadow : MonoBehaviour
 
     void LateUpdate()
     {
-        Vector3 position = sourceObject.position + originLocalPosition;
+        Vector3 position = sourceObject.position;
         Vector3 direction = Vector3.up;
         RaycastHit hit;
         if (Physics.Raycast(sourceObject.transform.position, Vector3.down, out hit, 100f, shadowMask, QueryTriggerInteraction.Ignore))

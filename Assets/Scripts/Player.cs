@@ -11,7 +11,7 @@ public class Player : MonoBehaviour, IDynamicObject
     private const float TIME_INVULNERABLE = 3f;
     private const float SPEED_KNOCKBACK = 7f;
     private const float MAX_GRAVITY = 16f;
-    private const float HEAVY_FALL_VELOCITY = 16f;
+    public const float HEAVY_FALL_VELOCITY = 16f;
     private const float SINK_HEIGHT = 0.7f;
     public static Player Instance { get; private set; }
 
@@ -247,9 +247,16 @@ public class Player : MonoBehaviour, IDynamicObject
             {
                 var surface = groundChecker.GroundData.coll.GetComponent<SurfaceProperties>();
                 if ((surface != null && surface.CanLand()) || surface == null)
-                    Land(groundChecker.GroundData, surface);
+                    Land(groundChecker.GroundData, surface, lastVelocity);
                 else if (surface != null)
                     newGrounded = false;
+            }
+            else
+            {
+                if (surfaceProperties != null)
+                    surfaceProperties.Leave(lastVelocity);
+
+                surfaceProperties = null;
             }
         }
         grounded = newGrounded;
@@ -339,8 +346,14 @@ public class Player : MonoBehaviour, IDynamicObject
         nextFrameBounds = coll.bounds;
         nextFrameBounds.center += rb.linearVelocity * Time.fixedDeltaTime;
     }
-    void Land (GroundData ground, SurfaceProperties surface)
+    void Land (GroundData ground, SurfaceProperties surface, Vector3 velocity)
     {
+        //Case when the surface change without jumping for some reason.
+        if (surfaceProperties != surface && surfaceProperties != null)
+        {
+            surfaceProperties.Clear();
+        }
+
         groundData = groundChecker.GroundData;
         checkpoint = transform.position;
         surfaceProperties = surface;
@@ -365,6 +378,8 @@ public class Player : MonoBehaviour, IDynamicObject
                 SurfaceProperties.Material.Water => "StepWater",
                 _ => "StepRock"
             };
+
+            surface.Landed(velocity);
         }
 
         sounds.PlaySound(sound);
