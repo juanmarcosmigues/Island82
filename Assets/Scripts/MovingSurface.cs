@@ -13,7 +13,7 @@ public class MovingSurface : MonoBehaviour
 
         return rotatedOffset - offset;
     }
-    public Vector3 GetFinalFrameTranslation(Vector3 worldPosition)
+    public virtual Vector3 GetFinalFrameTranslation(Vector3 worldPosition)
     {
         return force + GetRotationForce(worldPosition);
     }

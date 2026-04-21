@@ -259,6 +259,14 @@ public class Player : MonoBehaviour, IDynamicObject
                 surfaceProperties = null;
             }
         }
+        else if (newGrounded)
+        {
+            if (groundChecker.GroundData.coll != groundData.Value.coll)
+            {
+                surfaceProperties = groundChecker.GroundData.coll.GetComponent<SurfaceProperties>();
+                movingSurface = groundChecker.GroundData.coll.GetComponent<MovingSurface>();
+            }
+        }
         grounded = newGrounded;
         groundData = groundChecker.GroundData;
 
