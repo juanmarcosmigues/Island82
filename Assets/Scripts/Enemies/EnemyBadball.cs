@@ -1,11 +1,12 @@
 using System.Collections;
 using static DebugDraw;
 using UnityEngine;
+using Utils;
 
 
 public class EnemyBadBall : MonoBehaviour
 {
-    public Vector2 zone;
+    public float radius;
     public float jumpHeight;
     public Transform root;
     public Transform dieVFXs;
@@ -20,11 +21,12 @@ public class EnemyBadBall : MonoBehaviour
     private ObjectSounds sounds;
 
     bool dead = false;
-    Vector3 axis;
-    Vector3 perpAxis;
+    bool hostile = false;
+    float sqrRadius;
     Vector3 origin;
     Vector3 target;
     Vector3 deltaToTarget;
+    Vector3 moveDirection;
 
     private void Awake()
     {
@@ -38,9 +40,8 @@ public class EnemyBadBall : MonoBehaviour
     }
     private void Start()
     {
-        axis = Quaternion.AngleAxis(zone.y, Vector3.up) * Vector3.right;
-        perpAxis = Quaternion.AngleAxis(zone.y, Vector3.up) * Vector3.forward;
         origin = transform.position;
+        sqrRadius = radius * radius;
     }
     void Bounce(GroundData ground)
     {
@@ -52,21 +53,32 @@ public class EnemyBadBall : MonoBehaviour
         locomotion.Jump(jumpHeight);
         bounceAnim.Stop();
         bounceAnim.Play("animEnemyBallBounce");
+
+        Vector3 playerFromRadius = (Player.Instance.transform.position - origin).FlattenY();
+
+        if (playerFromRadius.sqrMagnitude < sqrRadius != hostile)
+        {
+            hostile = !hostile;
+        }
+
+        if (!hostile)
+            target = origin;
+        else
+            target = origin + Vector3.ClampMagnitude(playerFromRadius, radius);
+
+        deltaToTarget = (target - transform.position).FlattenY();
+        moveDirection = deltaToTarget.normalized;
     }
     private void Update()
     {
-        Vector3 delta = (Player.Instance.transform.position - origin).FlattenY();
-        target = origin + Vector3.ClampMagnitude(Vector3.Project(delta, axis), zone.x * 0.5f);
 
-        Vector3 newDeltaToTarget = (target - transform.position).FlattenY();
-        float dot = Vector3.Dot(deltaToTarget, newDeltaToTarget);
-        if (deltaToTarget.sqrMagnitude > 0.01f && dot >= 0f)
+        deltaToTarget = (target - transform.position).FlattenY();
+        if (deltaToTarget.sqrMagnitude > 0.01f && moveDirection.sqrMagnitude > 0.001f)
         {
-            locomotion.Move(deltaToTarget.normalized);
-        }
-        deltaToTarget = newDeltaToTarget;
+            locomotion.Move(moveDirection);
+        }     
 
-        root.rotation = Quaternion.LookRotation(perpAxis * Mathf.Sign(Vector3.Dot(perpAxis, delta)), Vector3.up);
+        //root.rotation = Quaternion.LookRotation(perpAxis * Mathf.Sign(Vector3.Dot(perpAxis, delta)), Vector3.up);
         //DebugDraw.Sphere(target, 0.1f, Quaternion.identity, Color.rebeccaPurple, 20, 0.1f);
     }
     public void Die(bool delay = true)
@@ -100,15 +112,7 @@ public class EnemyBadBall : MonoBehaviour
     private void OnDrawGizmos()
     {
         Vector3 o = Application.isPlaying ? origin : transform.position;
-        Matrix4x4 oldMatrix = Gizmos.matrix;
-
-        Quaternion rotation = Quaternion.AngleAxis(zone.y, Vector3.up);
-        Vector3 size = new Vector3(zone.x, 0f, 0f); // y is arbitrary height
-
-        Gizmos.matrix = Matrix4x4.TRS(o, rotation, Vector3.one);
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(Vector3.zero, size);
-
-        Gizmos.matrix = oldMatrix; // restore so later gizmos aren't affected
+        Gizmos.color = Color.yellow;
+        GizmosExtensions.DrawWireCircle(o, radius);
     }
 }
