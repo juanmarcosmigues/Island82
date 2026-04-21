@@ -163,6 +163,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7418572927300420636}
+  - component: {fileID: 4447157379954018293}
   m_Layer: 7
   m_Name: Root
   m_TagString: Untagged
@@ -183,9 +184,27 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 303314319633227567}
+  - {fileID: 2989252585035763167}
   m_Father: {fileID: 540522953569196263}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!111 &4447157379954018293
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5064004290350628896}
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Animation: {fileID: 7400000, guid: 5821bad9b22050240b521019649a39a7, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 5821bad9b22050240b521019649a39a7, type: 2}
+  - {fileID: 7400000, guid: 546b1018348aa4a41a94a6bd0f68155c, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 0
+  m_AnimatePhysics: 0
+  m_UpdateMode: 0
+  m_CullingType: 0
 --- !u!1 &5172381371383766351
 GameObject:
   m_ObjectHideFlags: 0
@@ -202,6 +221,7 @@ GameObject:
   - component: {fileID: 9143876810776701827}
   - component: {fileID: 9169365341184619323}
   - component: {fileID: 1998903420324966934}
+  - component: {fileID: 5102157065995084916}
   m_Layer: 7
   m_Name: BadBall
   m_TagString: Untagged
@@ -265,7 +285,7 @@ MonoBehaviour:
   onlyHeavyFall: 0
   debug: 0
   dontBounceOnHeavyFall: 1
-  anim: {fileID: 0}
+  anim: {fileID: 4447157379954018293}
   vfb: {fileID: 0}
 --- !u!114 &7831297876089148094
 MonoBehaviour:
@@ -293,11 +313,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae5bd6dda3707bf44ab39a7550e678da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBadBall
-  jumpHeight: 5.5
-  root: {fileID: 0}
+  zone: {x: 4, y: 0}
+  jumpHeight: 5
+  root: {fileID: 7418572927300420636}
   dieVFXs: {fileID: 0}
-  dropChance: 0
-  drop: 
+  bounceAnim: {fileID: 4447157379954018293}
+  dropChance: 1
+  drop: CoinDropX5
 --- !u!114 &9143876810776701827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -311,10 +333,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Locomotion
   speed: 2
-  gravity: -10
+  gravity: -7
   drag: 1
   airDrag: 1
-  rotationSpeed: 1
+  rotationSpeed: 0
 --- !u!114 &9169365341184619323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -363,6 +385,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!114 &5102157065995084916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5172381371383766351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b07243ad1f6f244cbf40484d470b272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectSounds
+  clip:
+  - key: DieSFX
+    value: {fileID: 8300000, guid: 336cdf01c70ff5d4e99ca6fca40323b9, type: 3}
+  - key: Step
+    value: {fileID: 8300000, guid: 6b1949cc98f7c1746ba5b102fb0046ad, type: 3}
 --- !u!1 &5976244896266940091
 GameObject:
   m_ObjectHideFlags: 0
@@ -539,13 +578,45 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.3
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &7821090316366620361
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2989252585035763167}
+  m_Layer: 7
+  m_Name: BottomRoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2989252585035763167
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7821090316366620361}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.275, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 303314319633227567}
+  m_Father: {fileID: 7418572927300420636}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &269986975283050692
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 7418572927300420636}
+    m_TransformParent: {fileID: 2989252585035763167}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: cd68644754c8e1b4685199931a942e0c, type: 3}
       propertyPath: m_LocalScale.x
@@ -557,7 +628,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd68644754c8e1b4685199931a942e0c, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.6459979
+      value: 0.6459977
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd68644754c8e1b4685199931a942e0c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -565,7 +636,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd68644754c8e1b4685199931a942e0c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.275
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cd68644754c8e1b4685199931a942e0c, type: 3}
       propertyPath: m_LocalPosition.z

@@ -1,13 +1,15 @@
 using System.Collections;
-using System.Collections.Generic;
+using static DebugDraw;
 using UnityEngine;
+
 
 public class EnemyBadBall : MonoBehaviour
 {
-    public float radius;
+    public Vector2 zone;
     public float jumpHeight;
     public Transform root;
     public Transform dieVFXs;
+    public Animation bounceAnim;
     [Range(0f, 1f)]
     public float dropChance;
     public string drop;
@@ -18,6 +20,11 @@ public class EnemyBadBall : MonoBehaviour
     private ObjectSounds sounds;
 
     bool dead = false;
+    Vector3 axis;
+    Vector3 perpAxis;
+    Vector3 origin;
+    Vector3 target;
+    Vector3 deltaToTarget;
 
     private void Awake()
     {
@@ -29,21 +36,41 @@ public class EnemyBadBall : MonoBehaviour
         jumpOn.OnJumpedOn += _ => Die(true);
         locomotion.OnLand += Bounce;
     }
+    private void Start()
+    {
+        axis = Quaternion.AngleAxis(zone.y, Vector3.up) * Vector3.right;
+        perpAxis = Quaternion.AngleAxis(zone.y, Vector3.up) * Vector3.forward;
+        origin = transform.position;
+    }
     void Bounce(GroundData ground)
     {
+        StartCoroutine(_Bounce());
+    }
+    IEnumerator _Bounce ()
+    {
+        yield return null;
         locomotion.Jump(jumpHeight);
+        bounceAnim.Stop();
+        bounceAnim.Play("animEnemyBallBounce");
     }
     private void Update()
     {
-        Vector3 moveDirection = (Player.Instance.transform.position - transform.position).FlattenY().normalized;
-        float factor = Mathf.Clamp01(Mathf.Max(Vector3.Dot(transform.forward, moveDirection.normalized) + 0.5f, 0.1f));
-        locomotion.Move(moveDirection, factor);
+        Vector3 delta = (Player.Instance.transform.position - origin).FlattenY();
+        target = origin + Vector3.ClampMagnitude(Vector3.Project(delta, axis), zone.x * 0.5f);
+
+        Vector3 newDeltaToTarget = (target - transform.position).FlattenY();
+        float dot = Vector3.Dot(deltaToTarget, newDeltaToTarget);
+        if (deltaToTarget.sqrMagnitude > 0.01f && dot >= 0f)
+        {
+            locomotion.Move(deltaToTarget.normalized);
+        }
+        deltaToTarget = newDeltaToTarget;
+
+        root.rotation = Quaternion.LookRotation(perpAxis * Mathf.Sign(Vector3.Dot(perpAxis, delta)), Vector3.up);
+        //DebugDraw.Sphere(target, 0.1f, Quaternion.identity, Color.rebeccaPurple, 20, 0.1f);
     }
     public void Die(bool delay = true)
     {
-        Debug.Log("die");
-        locomotion.KillVerticalVelocity();
-        return;
         if (dead) return;
         dead = true;
 
@@ -69,5 +96,19 @@ public class EnemyBadBall : MonoBehaviour
         }
 
         yield break;
+    }
+    private void OnDrawGizmos()
+    {
+        Vector3 o = Application.isPlaying ? origin : transform.position;
+        Matrix4x4 oldMatrix = Gizmos.matrix;
+
+        Quaternion rotation = Quaternion.AngleAxis(zone.y, Vector3.up);
+        Vector3 size = new Vector3(zone.x, 0f, 0f); // y is arbitrary height
+
+        Gizmos.matrix = Matrix4x4.TRS(o, rotation, Vector3.one);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(Vector3.zero, size);
+
+        Gizmos.matrix = oldMatrix; // restore so later gizmos aren't affected
     }
 }
