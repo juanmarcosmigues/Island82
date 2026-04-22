@@ -6,20 +6,25 @@ public class Trigger : MonoBehaviour
     public bool consume;
     public string targetTag;
     public BoxCollider trigger;
-    public ITrigger[] targets;
+    public GameObject[] targets;
     public Color color;
+
+    private ITrigger[] targetsTriggers;
 
     private void Awake()
     {
-        gameObject.layer = LayerMask.GetMask(GameDefinitions.LAYER_TRIGGER);
+        gameObject.layer = LayerMask.NameToLayer(GameDefinitions.LAYER_TRIGGER);
         trigger.isTrigger = true;
+        targetsTriggers = new ITrigger[targets.Length];
+        for (int i = 0; i < targets.Length; i++)
+            targetsTriggers[i] = targets[i].GetComponent<ITrigger>();
     }
     private void OnTriggerEnter(Collider other)
     {
         if (targetTag.Length > 0)
             if (other.tag != targetTag) return;
 
-        targets.ForEach(t => t.Trigger());
+        targetsTriggers.ForEach(t => t.Trigger());
 
         if (consume)
             gameObject.SetActive(false);

@@ -53,10 +53,9 @@ public class Player : MonoBehaviour, IDynamicObject
     Coroutine invulnerableBlinkCoroutine;
 
     public Bounds NextFrameBounds => nextFrameBounds;
-    public Bounds? MaxAirBounds { get; private set; }
     public float VerticalVelocity => verticalVelocity.y;
-    public bool IsGrounded {  get; private set; }
-    public bool IsHeavyFalling { get; private set; }
+    public bool IsGrounded => grounded;
+    public bool IsHeavyFalling => heavyFalling;
     public bool Sunk => sunkValue > 0f;
 
     Vector3 lookDirection;
@@ -65,6 +64,7 @@ public class Player : MonoBehaviour, IDynamicObject
     float currentJumpForce;
     Vector3 lastVelocity;
     bool grounded;
+    bool heavyFalling;
     float jumpValue;
     Vector3 checkpoint;
     MovingSurface movingSurface;
@@ -205,6 +205,7 @@ public class Player : MonoBehaviour, IDynamicObject
         if (perfectBounce)
             StartCoroutine(PerfectBounceAnimation(1f));
     }
+    public void Jump() => Jump(jumpImpulse);
     public void Jump(float impulse, bool ignoreGrounded = false)
     {
         if (Sunk)
@@ -305,13 +306,11 @@ public class Player : MonoBehaviour, IDynamicObject
         }
 
         if (!grounded && verticalVelocity.y <= -HEAVY_FALL_VELOCITY)
-            IsHeavyFalling = true;
+            heavyFalling = true;
 
         velocity += verticalVelocity;
         velocity += moveVelocity;
         velocity += horizontalVelocity;
-
-        IsGrounded = grounded;
 
         if (Sunk)
         {
@@ -338,18 +337,6 @@ public class Player : MonoBehaviour, IDynamicObject
 
         //Caches ---------------------------------------------->
         lastVelocity = velocity;
-        if (grounded)
-        {
-            MaxAirBounds = null;
-        }
-        else
-        {
-            if (!MaxAirBounds.HasValue)
-                MaxAirBounds = coll.bounds;
-
-            MaxAirBounds = coll.bounds.center.y > MaxAirBounds.Value.center.y 
-                ? coll.bounds : MaxAirBounds.Value;
-        }
 
         nextFrameBounds = coll.bounds;
         nextFrameBounds.center += rb.linearVelocity * Time.fixedDeltaTime;
@@ -368,10 +355,10 @@ public class Player : MonoBehaviour, IDynamicObject
         movingSurface = groundData.Value.coll.GetComponent<MovingSurface>();
 
 
-        if (IsHeavyFalling)
+        if (heavyFalling)
         {
             Sink(surface, ground);
-            IsHeavyFalling = false;
+            heavyFalling = false;
         }
 
         string sound = "StepRock";
