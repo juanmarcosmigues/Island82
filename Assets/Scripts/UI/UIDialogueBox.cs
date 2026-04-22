@@ -26,6 +26,7 @@ public class UIDialogueBox : MonoBehaviour, IInteractable
     protected List<int> revealIndices;
     protected List<System.Action> steps;
     public bool Writing => currentText.Length < goalBody.Length;
+    public bool HasEnded => steps.Count == 0 && !gameObject.activeSelf;
 
     private void Awake()
     {

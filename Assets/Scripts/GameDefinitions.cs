@@ -10,6 +10,7 @@ public static class GameDefinitions
     public const string LAYER_DYNAMICSOLID = "DynamicSolid";
     public const string LAYER_COLLISIONONLY = "CollisionOnly";
     public const string LAYER_PLAYER = "Player";
+    public const string LAYER_TRIGGER = "Trigger";
 
     public const int UI_CHARACTERS_PER_SECOND = 30;
 }
