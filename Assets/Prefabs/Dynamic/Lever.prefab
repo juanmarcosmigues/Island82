@@ -252,6 +252,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2894987201300711055}
   - component: {fileID: 4999662606558512531}
+  - component: {fileID: 2676877631253561345}
   m_Layer: 0
   m_Name: Lever
   m_TagString: Untagged
@@ -267,7 +268,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7366261045346660776}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.70710707, z: -0, w: 0.70710653}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 3.09, y: 1.04, z: -0.84}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -301,7 +302,36 @@ MonoBehaviour:
   rotationTarget: {fileID: 6529033902285052777}
   OnPressed:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Door, Assembly-CSharp
+        m_MethodName: TriggerOpen
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &2676877631253561345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7366261045346660776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b07243ad1f6f244cbf40484d470b272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectSounds
+  clip:
+  - key: Pressed
+    value: {fileID: 8300000, guid: fb663c23b72b56a408b2c34718121393, type: 3}
+  - key: Squeak
+    value: {fileID: 8300000, guid: 7561cdeb70400aa48a22cc046756d0e3, type: 3}
 --- !u!1 &7917215199777939605
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,7 +466,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa684132d4f727143817ef9d6bc7e652, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurfaceProperties
-  material: 0
+  material: 1
   jumpOn: {fileID: 0}
 --- !u!54 &615601998487016311
 Rigidbody:

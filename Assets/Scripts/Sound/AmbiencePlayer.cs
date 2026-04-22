@@ -17,6 +17,7 @@ public class AmbiencePlayer : MonoBehaviour
 
     public string ambienceName;
     public bool startFading;
+    public bool dontDestroy;
 
     float targetVolume;
     AudioSource source;
@@ -28,6 +29,19 @@ public class AmbiencePlayer : MonoBehaviour
     }
     private void Awake()
     {
+        if (dontDestroy)
+        {
+            if (Ambiences.ContainsKey(ambienceName))
+            {
+                Destroy(this.gameObject);
+                return;
+            }
+            else
+            {
+                DontDestroyOnLoad(this.gameObject);
+            }
+        }
+
         source = GetComponent<AudioSource>();
         targetVolume = source.volume;
         Ambiences.Add(ambienceName, this);
