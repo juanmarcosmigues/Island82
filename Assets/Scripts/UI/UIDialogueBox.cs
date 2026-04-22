@@ -87,7 +87,7 @@ public class UIDialogueBox : MonoBehaviour, IInteractable
         gameObject.SetActive(true);
 
         if (Player.Instance != null)
-            Player.Instance.PlayerInControl = false;
+            Player.Instance.PlayerInControl.Set(false, "Dialogue");
 
         revealIndices = new();
         for (int i = 0; i < goalBody.Length; i++)
@@ -104,7 +104,7 @@ public class UIDialogueBox : MonoBehaviour, IInteractable
         gameObject.SetActive(false);
 
         if (Player.Instance != null)
-            Player.Instance.PlayerInControl = true;
+            Player.Instance.PlayerInControl.Set(true, "Dialogue");
     }
     void Next ()
     {

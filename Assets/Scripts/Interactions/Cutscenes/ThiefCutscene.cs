@@ -8,14 +8,22 @@ public class ThiefCutscene : Cutscene
     public float speed;
     public LocomotionPath path;
     public Dialogue[] dialogue;
+    public GameObject bounds;
+    public GameObject nextSceneLoader;
 
+    Coroutine playerLookAt;
     protected override IEnumerator CustomCutscene()
     {
+        nextSceneLoader.SetActive(false);
+        bounds.SetActive(true);
+
         yield return new WaitForSeconds(1);
 
         yield return PlayerMove();
 
         yield return new WaitForSeconds(0.5f);
+
+        playerLookAt = StartCoroutine(PlayerLookAt(thief.transform));
 
         thief.gameObject.SetActive(true);
         thief.transform.position = path.GetPoint(0);
@@ -36,7 +44,13 @@ public class ThiefCutscene : Cutscene
 
         yield return MoveToTarget(path.GetPoint(4));
 
+        StopCoroutine(playerLookAt);
+        playerLookAt = null;
+
         thief.gameObject.SetActive(false);
+
+        nextSceneLoader.SetActive(true);
+        bounds.SetActive(false);
     }
     IEnumerator LookAt(Vector3 target)
     {
@@ -62,7 +76,14 @@ public class ThiefCutscene : Cutscene
         }
         
     }
-
+    IEnumerator PlayerLookAt (Transform target)
+    {
+        while (true)
+        {
+            Player.Instance.LookAt((target.position - Player.Instance.transform.position).FlattenY().normalized);
+            yield return null;
+        }
+    }
     IEnumerator PlayerMove ()
     {
         Player player = Player.Instance;
@@ -83,9 +104,10 @@ public class ThiefCutscene : Cutscene
 
         Vector3 jumpDir = (jumpTarget - player.transform.position).FlattenY();
 
+        player.Jump();
+
         do
         {
-            player.Jump();
             player.Move(jumpDir.normalized, 1f);
             yield return new WaitForFixedUpdate();   
 

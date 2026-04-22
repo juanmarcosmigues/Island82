@@ -45,7 +45,7 @@ public class Player : MonoBehaviour, IDynamicObject
     private List<IInteractable> availableInteractions = new();
 
     public bool PlayerRotation {  get; set; } = true;
-    public bool PlayerInControl { get; set; } = true;
+    public GatedBool PlayerInControl { get; } = new();
     public int CurrentLife { get; private set; } = 5;
     public bool Invulnerable { get; private set; } = false;
 
@@ -149,7 +149,7 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     private void PressJump ()
     {
-        if (!PlayerInControl) return;
+        if (!PlayerInControl.True) return;
 
         if (grounded)
         {
@@ -166,13 +166,11 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     private void MoveAxis (Vector2 input, float val)
     {
-        if (!PlayerInControl) return;
+        if (!PlayerInControl.True) return;
         if (Sunk) return;
 
         Vector3 dir = Camera.main.RotateTowardsCamera(input).normalized;
-
-        if (PlayerRotation)
-            lookDirection = dir;
+        LookAt(dir);
 
         if (val > 0.1f) Move(dir, val);
         else Move(dir, 0f);
@@ -190,6 +188,11 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         meshPlayer.SetActive(!inside);
         meshPlayerHead.SetActive(inside);
+    }
+    public void LookAt (Vector3 dir)
+    {
+        if (PlayerRotation)
+            lookDirection = dir;
     }
     public void Move (Vector3 dir, float factor)
     {

@@ -30,13 +30,13 @@ public class Cutscene : MonoBehaviour, ITrigger
         OnCutsceneStart?.Invoke();
 
         if (!playerInControl)
-            Player.Instance.PlayerInControl = false;
+            Player.Instance.PlayerInControl.Set(false, "Cutscene");
 
         this.cutscene = StartCoroutine(CustomCutscene());
         yield return cutscene;
 
         if (!playerInControl)
-            Player.Instance.PlayerInControl = true;
+            Player.Instance.PlayerInControl.Set(true, "Cutscene");
 
         OnCutsceneEnd?.Invoke();
 
