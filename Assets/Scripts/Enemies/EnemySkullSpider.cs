@@ -37,7 +37,7 @@ public class EnemySkullSpider : MonoBehaviour
 
     private void Update()
     {
-        Vector3 moveDirection = patrol.GetTargetDirection(transform.position);
+        Vector3 moveDirection = patrol.GetTarget(transform.position).direction;
         float factor = Mathf.Clamp01(Mathf.Max(Vector3.Dot(transform.forward, moveDirection.normalized) + 0.5f, 0.1f));
         locomotion.Move(moveDirection, factor);
     }

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using static CombatHandler;
 
@@ -48,15 +47,16 @@ public class Player : MonoBehaviour, IDynamicObject
     public GatedBool PlayerInControl { get; } = new();
     public int CurrentLife { get; private set; } = 5;
     public bool Invulnerable { get; private set; } = false;
-
-    Timestamp gotHitTimer;
-    Coroutine invulnerableBlinkCoroutine;
-
+    public Vector3 LookingDirection => directionRoot.forward;
     public Bounds NextFrameBounds => nextFrameBounds;
     public float VerticalVelocity => verticalVelocity.y;
     public bool IsGrounded => grounded;
     public bool IsHeavyFalling => heavyFalling;
     public bool Sunk => sunkValue > 0f;
+    public Screw Screw => currentScrew;
+
+    Timestamp gotHitTimer;
+    Coroutine invulnerableBlinkCoroutine;
 
     Vector3 lookDirection;
     Timestamp pressedJumpTimer;
@@ -81,6 +81,8 @@ public class Player : MonoBehaviour, IDynamicObject
 
     float pickUpCoinCombo;
 
+    Screw currentScrew;
+
     private void Awake()
     {
         Instance = this;
@@ -101,37 +103,8 @@ public class Player : MonoBehaviour, IDynamicObject
 
         combatHandler.OnGetHit += GetHit;
     }
-    private void Update()
-    {
-        if (pressedJumpTimer.remainingTime > 0f && grounded)
-        {
-            PressJump();
-        }
 
-        if (lookDirection.sqrMagnitude > 0.01f)
-        {
-            Vector3 forward = Camera.main.RotateTowardsCamera(new Vector2(0f, 1f));
-            Vector3 right = Camera.main.RotateTowardsCamera(new Vector2(1f, 0f));
-            float angle = Vector3.Angle(forward, lookDirection);
-            float side = Mathf.Sign(Vector3.Dot(lookDirection, right));
-            float saturatedAngle = Mathf.Round(angle / 45f) * 45f * side;
-            directionRoot.forward = Quaternion.AngleAxis(saturatedAngle, Vector3.up) * forward;
-        }
-
-        if (gotHitTimer.remainingTime < 0f && invulnerableBlinkCoroutine != null)
-        {
-            StopCoroutine(invulnerableBlinkCoroutine);
-            invulnerableBlinkCoroutine = null;
-            renderRoot.gameObject.SetActive(true);
-            Invulnerable = false;
-        }
-
-        if (pickUpCoinCombo > 0f)
-            pickUpCoinCombo = Mathf.Clamp01(pickUpCoinCombo-Time.deltaTime*0.5f);
-
-        Shader.SetGlobalVector("_PlayerPosition", transform.position);
-    }
-
+    #region Controls
     private void PressInteract()
     {
         string interactables = "Interactions List: \n";
@@ -175,38 +148,18 @@ public class Player : MonoBehaviour, IDynamicObject
         if (val > 0.1f) Move(dir, val);
         else Move(dir, 0f);
     }
-    public void GetCoin ()
-    {
-        vfGetCoin.Play();
-        float pitch = Mathf.Lerp(0.9f, 1.2f, Mathf.Clamp01(pickUpCoinCombo));
-        sounds.PlaySound("PickUp", 0.5f);
-        pickUpCoinCombo += 0.15f;
-
-        GameplayManager.Instance?.AddCoins(1);
-    }
-    public void InsideObject (bool inside)
-    {
-        meshPlayer.SetActive(!inside);
-        meshPlayerHead.SetActive(inside);
-    }
     public void LookAt (Vector3 dir)
     {
-        if (PlayerRotation)
-            lookDirection = dir;
+        if (!PlayerRotation) return;
+
+        lookDirection = dir;
+
+        if (currentScrew != null)
+            lookDirection = currentScrew.ConstraintPlayerRotation(lookDirection);
     }
     public void Move (Vector3 dir, float factor)
     {
         moveVelocity = dir * factor * moveSpeed;
-    }
-    public void BounceOff ()
-    {
-        bool perfectBounce = pressedJumpTimer.remainingTime > 0f;
-        bounceModifier = perfectBounce ? 0.7f : 0.5f;
-        float force = perfectBounce ? 13f : 11f;
-        Jump(force, true);
-
-        if (perfectBounce)
-            StartCoroutine(PerfectBounceAnimation(1f));
     }
     public void Jump() => Jump(jumpImpulse);
     public void Jump(float impulse, bool ignoreGrounded = false)
@@ -237,6 +190,39 @@ public class Player : MonoBehaviour, IDynamicObject
             return;
 
         verticalVelocity.y *= 0.5f;
+    }
+
+    #endregion
+
+    private void Update()
+    {
+        if (pressedJumpTimer.remainingTime > 0f && grounded)
+        {
+            PressJump();
+        }
+
+        if (lookDirection.sqrMagnitude > 0.01f)
+        {
+            Vector3 forward = Camera.main.RotateTowardsCamera(new Vector2(0f, 1f));
+            Vector3 right = Camera.main.RotateTowardsCamera(new Vector2(1f, 0f));
+            float angle = Vector3.Angle(forward, lookDirection);
+            float side = Mathf.Sign(Vector3.Dot(lookDirection, right));
+            float saturatedAngle = Mathf.Round(angle / 45f) * 45f * side;
+            directionRoot.forward = Quaternion.AngleAxis(saturatedAngle, Vector3.up) * forward;
+        }
+
+        if (gotHitTimer.remainingTime < 0f && invulnerableBlinkCoroutine != null)
+        {
+            StopCoroutine(invulnerableBlinkCoroutine);
+            invulnerableBlinkCoroutine = null;
+            renderRoot.gameObject.SetActive(true);
+            Invulnerable = false;
+        }
+
+        if (pickUpCoinCombo > 0f)
+            pickUpCoinCombo = Mathf.Clamp01(pickUpCoinCombo - Time.deltaTime * 0.5f);
+
+        Shader.SetGlobalVector("_PlayerPosition", transform.position);
     }
     private void FixedUpdate()
     {
@@ -344,47 +330,9 @@ public class Player : MonoBehaviour, IDynamicObject
         nextFrameBounds = coll.bounds;
         nextFrameBounds.center += rb.linearVelocity * Time.fixedDeltaTime;
     }
-    void Land (GroundData ground, SurfaceProperties surface, Vector3 velocity)
-    {
-        //Case when the surface change without jumping for some reason.
-        if (surfaceProperties != surface && surfaceProperties != null)
-        {
-            surfaceProperties.Clear();
-        }
 
-        groundData = groundChecker.GroundData;
-        checkpoint = transform.position;
-        surfaceProperties = surface;
-        movingSurface = groundData.Value.coll.GetComponent<MovingSurface>();
+    #region Reactions
 
-
-        if (heavyFalling)
-        {
-            Sink(surface, ground);
-            heavyFalling = false;
-        }
-
-        string sound = "StepRock";
-        if (surface != null)
-        {
-            sound = surface.material switch
-            {
-                SurfaceProperties.Material.Wood => "StepWood",
-                SurfaceProperties.Material.Grass => "StepGrass",
-                SurfaceProperties.Material.Rock => "StepRock",
-                SurfaceProperties.Material.Sand => "StepSand",
-                SurfaceProperties.Material.Water => "StepWater",
-                _ => "StepRock"
-            };
-
-            surface.Landed(velocity);
-        }
-
-        sounds.PlaySound(sound);
-
-        OnGroundedStart?.Invoke();
-        dust.Play();
-    }
     void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
     {
         if (Invulnerable) { return; }
@@ -393,7 +341,7 @@ public class Player : MonoBehaviour, IDynamicObject
         Invulnerable = true;
         gotHitTimer.Set(TIME_INVULNERABLE);
 
-        invulnerableBlinkCoroutine = 
+        invulnerableBlinkCoroutine =
             StartCoroutine(renderRoot.gameObject.Blink(0.05f, TIME_INVULNERABLE));
 
         float knockbackForce = SPEED_KNOCKBACK;
@@ -402,9 +350,9 @@ public class Player : MonoBehaviour, IDynamicObject
             Weight.Light => 0.8f,
             Weight.Medium => 1f,
             Weight.Heavy => 1.2f,
-            _ => 1.0f 
+            _ => 1.0f
         };
-        knockbackForce *= knockback ? 1f : 0f;  
+        knockbackForce *= knockback ? 1f : 0f;
 
         FrameFreeze.Freeze(0.3f, () =>
         {
@@ -453,17 +401,92 @@ public class Player : MonoBehaviour, IDynamicObject
             dirtHole.gameObject.SetActive(true);
         }
     }
+    public void BounceOff()
+    {
+        bool perfectBounce = pressedJumpTimer.remainingTime > 0f;
+        bounceModifier = perfectBounce ? 0.7f : 0.5f;
+        float force = perfectBounce ? 13f : 11f;
+        Jump(force, true);
+
+        if (perfectBounce)
+            StartCoroutine(PerfectBounceAnimation(1f));
+    }
+    public void GetCoin()
+    {
+        vfGetCoin.Play();
+        float pitch = Mathf.Lerp(0.9f, 1.2f, Mathf.Clamp01(pickUpCoinCombo));
+        sounds.PlaySound("PickUp", 0.5f);
+        pickUpCoinCombo += 0.15f;
+
+        GameplayManager.Instance?.AddCoins(1);
+    }
+    public void InsideObject(bool inside)
+    {
+        meshPlayer.SetActive(!inside);
+        meshPlayerHead.SetActive(inside);
+    }
+    public void ScrewIn (Screw screw)
+    {
+        rb.isKinematic = true;
+        currentScrew = screw;
+        renderRoot.localPosition = Vector3.up * -0.2f;
+        transform.position = screw.transform.position + Vector3.up * coll.bounds.extents.y;
+        GetComponentInChildren<ObjectShadow>().gameObject.SetActive(false);      
+    }
+
+    #endregion
+
     public void AddInteraction (IInteractable interactable)
     {
-        Debug.Log("Added interaction:" + interactable.InteractionName);
+        //Debug.Log("Added interaction:" + interactable.InteractionName);
         availableInteractions.Add(interactable);
     }
     public void RemoveInteraction (IInteractable interactable)
     {
-        Debug.Log("Removed interaction:" + interactable.InteractionName);
+        //Debug.Log("Removed interaction:" + interactable.InteractionName);
         availableInteractions.Remove(interactable);
     }
+    void Land(GroundData ground, SurfaceProperties surface, Vector3 velocity)
+    {
+        //Case when the surface change without jumping for some reason.
+        if (surfaceProperties != surface && surfaceProperties != null)
+        {
+            surfaceProperties.Clear();
+        }
 
+        groundData = groundChecker.GroundData;
+        checkpoint = transform.position;
+        surfaceProperties = surface;
+        movingSurface = groundData.Value.coll.GetComponent<MovingSurface>();
+
+
+        if (heavyFalling)
+        {
+            Sink(surface, ground);
+            heavyFalling = false;
+        }
+
+        string sound = "StepRock";
+        if (surface != null)
+        {
+            sound = surface.material switch
+            {
+                SurfaceProperties.Material.Wood => "StepWood",
+                SurfaceProperties.Material.Grass => "StepGrass",
+                SurfaceProperties.Material.Rock => "StepRock",
+                SurfaceProperties.Material.Sand => "StepSand",
+                SurfaceProperties.Material.Water => "StepWater",
+                _ => "StepRock"
+            };
+
+            surface.Landed(velocity);
+        }
+
+        sounds.PlaySound(sound);
+
+        OnGroundedStart?.Invoke();
+        dust.Play();
+    }
     IEnumerator PerfectBounceAnimation (float duration)
     {
         PlayerRotation = false;
@@ -497,7 +520,6 @@ public class Player : MonoBehaviour, IDynamicObject
         DrawArrow(origin, verticalVelocity, Color.blue);   // Vertical (gravity / jump)
         DrawArrow(origin, lastVelocity, Color.white);   // Vertical (gravity / jump)
     }
-
     private void DrawArrow(Vector3 origin, Vector3 vector, Color color, float headSize = 0.25f, float headAngle = 20f)
     {
         if (vector.sqrMagnitude < 0.0001f) return;
