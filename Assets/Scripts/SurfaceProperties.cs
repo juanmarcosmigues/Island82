@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SurfaceProperties : MonoBehaviour
 {
-    public enum Material { Grass, Rock, Sand, Wood, Water }
+    public enum Material { Grass, Rock, Sand, Wood, Water, Metal }
     public Material material;
     public JumpOn jumpOn;
 

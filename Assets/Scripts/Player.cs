@@ -124,6 +124,13 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         if (!PlayerInControl.True) return;
 
+        if (currentScrew != null)
+        {
+            ScrewOut();
+            Jump(jumpImpulse);
+            return;
+        }
+
         if (grounded)
         {
             Jump(jumpImpulse);
@@ -143,19 +150,20 @@ public class Player : MonoBehaviour, IDynamicObject
         if (Sunk) return;
 
         Vector3 dir = Camera.main.RotateTowardsCamera(input).normalized;
-        LookAt(dir);
+
+        if (currentScrew == null)
+        {
+            if (PlayerRotation) LookAt(dir);
+        }
+        else
+            currentScrew.PlayerRotationInput(dir, val);
 
         if (val > 0.1f) Move(dir, val);
         else Move(dir, 0f);
     }
     public void LookAt (Vector3 dir)
     {
-        if (!PlayerRotation) return;
-
-        lookDirection = dir;
-
-        if (currentScrew != null)
-            lookDirection = currentScrew.ConstraintPlayerRotation(lookDirection);
+        lookDirection = dir;       
     }
     public void Move (Vector3 dir, float factor)
     {
@@ -226,8 +234,15 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     private void FixedUpdate()
     {
+        if (rb.isKinematic)
+        {
+            moveVelocity = Vector3.zero;
+            horizontalVelocity = Vector3.zero;
+            verticalVelocity = Vector3.zero;
+            return;
+        }
         //Grounded Step ----------------------------->
-        bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
+         bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
         if (newGrounded != grounded)
         {
             movingSurface = null;
@@ -277,8 +292,6 @@ public class Player : MonoBehaviour, IDynamicObject
                 downwardsGravity :
                 upwardsGravity * (1 - bounceModifier))
                 * Vector3.up * Time.fixedDeltaTime;
-
-            Debug.Log("adding gravity");
         }
 
         verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
@@ -300,14 +313,6 @@ public class Player : MonoBehaviour, IDynamicObject
         velocity += verticalVelocity;
         velocity += moveVelocity;
         velocity += horizontalVelocity;
-
-        if (Sunk)
-        {
-            velocity = Vector3.zero;
-            moveVelocity = Vector3.zero;
-            horizontalVelocity = Vector3.zero;
-            verticalVelocity = Vector3.zero;
-        }
 
         Vector3 nextPosition = rb.position + velocity * Time.fixedDeltaTime;
         Vector3 nextFeetPosition = nextPosition - coll.bounds.extents.y * Vector3.up;
@@ -430,8 +435,14 @@ public class Player : MonoBehaviour, IDynamicObject
         rb.isKinematic = true;
         currentScrew = screw;
         renderRoot.localPosition = Vector3.up * -0.2f;
-        transform.position = screw.transform.position + Vector3.up * coll.bounds.extents.y;
-        GetComponentInChildren<ObjectShadow>().gameObject.SetActive(false);      
+        GetComponentInChildren<ObjectShadow>(true).gameObject.SetActive(false);
+    }
+    public void ScrewOut ()
+    {
+        rb.isKinematic = false;
+        currentScrew = null;
+        renderRoot.localPosition = Vector3.zero;
+        GetComponentInChildren<ObjectShadow>(true).gameObject.SetActive(true);
     }
 
     #endregion

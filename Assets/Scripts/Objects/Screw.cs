@@ -4,80 +4,99 @@ using Utils;
 
 public class Screw : MonoBehaviour
 {
-    private const float ACTIVE_VELOCITY = 8f;
-    private const float IDLE_VELOCITY = 1f;
+    private const float HEIGHT_VELOCITY = 4f;
+    private const float DECAY_ANGLE_RATE = 60f;
     private const float HEIGHT_PER_ANGLE = 0.005f;
+    private const float ZIP_PART_HEIGHT = 0.6f;
 
     public float radius;
+    [Range(0, 30)]
     public int screwTurns;
     public Transform screw;
+    public Transform screwRender;
+    public GameObject[] zipParts;
 
     private Rigidbody screwRigidBody;
-    private SurfaceProperties surface;
+    private SurfaceProperties surfaceBase;
+    private SurfaceProperties surfaceScrew;
+    private Vector3 originDirection;
     private Vector3 currentDirection;
     private Vector3 currentDirectionPerp;
+    private Vector3 playerRelativePos;
+    private Vector3 lastPlayerDirection;
     private float screwMaxAngle;
     private float currentScrewValue;
+    private Timestamp timerMovedUp;
 
     private void Awake()
     {
-        surface = GetComponent<SurfaceProperties>();
+        surfaceBase = GetComponent<SurfaceProperties>();
+        surfaceScrew = screw.GetComponent<SurfaceProperties>();
         screwRigidBody = screw.GetComponent<Rigidbody>();
         screwMaxAngle = screwTurns * 45f;
     }
+    private void Start()
+    {
+        originDirection = PosterizedDirection(screw.forward);
+        screwRender.forward = originDirection;
+    }
     private void FixedUpdate()
     {
-        if (Player.Instance.Screw != this)
+        if (surfaceBase.landed || surfaceScrew.landed)
         {
-            if (!surface.landed) return;
-
-            float dot = Vector3.Dot(screw.forward, Player.Instance.LookingDirection);
-            if (dot > 0.9f)
+            if (Player.Instance.Screw != this)
             {
-                Player.Instance.ScrewIn(this);
-                SetScrewDirection(screw.forward);
+                float dot = Vector3.Dot(currentDirection, Player.Instance.LookingDirection);
+                float distance = (Player.Instance.transform.position - transform.position).FlattenY().magnitude;
+                if (dot > 0.9f && distance < radius)
+                    ScrewIn();
+            }
+            else
+            {
+                Player.Instance.transform.position = screw.TransformPoint(playerRelativePos);
+                Player.Instance.LookAt(currentDirection);
             }
         }
-        else
-        {
-            Vector3 target = Vector3.up * currentScrewValue * HEIGHT_PER_ANGLE;
-            bool goingUp = screwRigidBody.position.y < target.y;
-            screw.localPosition = Vector3.MoveTowards
-                (screw.localPosition,
-                target,
-                ACTIVE_VELOCITY * Time.fixedDeltaTime);
-        }
+
+        if (timerMovedUp.elapsed > 0.3f)
+            UpdateScrewValue(-DECAY_ANGLE_RATE * Time.fixedDeltaTime);
+
+        Vector3 target = Vector3.up * currentScrewValue * HEIGHT_PER_ANGLE;
+        screw.localPosition = Vector3.MoveTowards
+            (screw.localPosition,
+            target,
+            HEIGHT_VELOCITY * Time.fixedDeltaTime);
+
+        int activePart = Mathf.FloorToInt(screw.localPosition.y / ZIP_PART_HEIGHT);
+        for (int i = 0; i < zipParts.Length; i++)
+            zipParts[i].gameObject.SetActive(i <= activePart);
     }
 
-    public Vector3 ConstraintPlayerRotation (Vector3 lookDirection)
+    public void PlayerRotationInput(Vector3 input, float magnitude)
     {
-        Vector3 polarizedDirection = PolarizedDirection(lookDirection);
-
-        float angle = Vector3.Angle(polarizedDirection, currentDirection);
-
-        if (angle > 1f && angle < 50f)
+        float angle = Vector3.SignedAngle(lastPlayerDirection, input, Vector3.up);
+        if (magnitude < 0.5f)
         {
-            float sign = Vector3.Dot(currentDirectionPerp, polarizedDirection) < 0.5f ? 1f : -1f;
-            float newValue = currentScrewValue + angle * sign;
-
-            if (newValue < 0f)
-            {
-                return currentDirection;
-            }
-            if (newValue > screwMaxAngle)
-            {
-                return currentDirection;
-            }
-
-            SetScrewDirection(polarizedDirection);
-            currentScrewValue = newValue;
-
-            return polarizedDirection;
+            lastPlayerDirection = input;
+            return;
         }
 
-        return currentDirection;
+        if (Mathf.Abs(angle) > 1f && Mathf.Abs(angle) < 45f)
+        {
+            UpdateScrewValue(-angle);
+            lastPlayerDirection = input;
+        }
     }
-    private Vector3 PolarizedDirection (Vector3 direction )
+    void ScrewIn ()
+    {
+        Player.Instance.ScrewIn(this);
+        Player.Instance.transform.position = 
+            screw.transform.position + Vector3.up * Player.Instance.coll.bounds.extents.y;
+        lastPlayerDirection = Player.Instance.transform.forward;
+        playerRelativePos = screw.InverseTransformPoint(Player.Instance.transform.position);
+        UpdateScrewValue(0);      
+    }
+    private Vector3 PosterizedDirection (Vector3 direction )
     {
         Vector3 forward = Camera.main.RotateTowardsCamera(new Vector2(0f, 1f));
         Vector3 right = Camera.main.RotateTowardsCamera(new Vector2(1f, 0f));
@@ -87,11 +106,15 @@ public class Screw : MonoBehaviour
 
         return Quaternion.AngleAxis(saturatedAngle, Vector3.up) * forward;
     } 
-    private void SetScrewDirection (Vector3 dir)
+    private void UpdateScrewValue (float addAngle)
     {
-        currentDirection = dir;
-        currentDirectionPerp = Quaternion.AngleAxis(90f, Vector3.up) * dir;
-        screw.forward = currentDirection;
+        if (addAngle > 0f)
+            timerMovedUp.Set();
+
+        currentScrewValue = Mathf.Clamp(currentScrewValue + addAngle, 0, screwMaxAngle);  
+        currentDirection = PosterizedDirection(Quaternion.AngleAxis(-currentScrewValue, Vector3.up) * originDirection);
+        currentDirectionPerp = Quaternion.AngleAxis(90f, Vector3.up) * currentDirection;
+        screwRender.forward = currentDirection;
     }
     private void OnDrawGizmos()
     {
