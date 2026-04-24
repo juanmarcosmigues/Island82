@@ -12,6 +12,10 @@ public class Player : MonoBehaviour, IDynamicObject
     private const float MAX_GRAVITY = 16f;
     public const float HEAVY_FALL_VELOCITY = 16f;
     private const float SINK_HEIGHT = 0.7f;
+    private const float CHARACTER_HEIGHT = 1f;
+    private const float SPIRIT_HEIGHT = 0.2f;
+    private const float SPIRIT_DAMPING = 3f;
+
     public static Player Instance { get; private set; }
 
     [Header("Physics")]
@@ -22,10 +26,12 @@ public class Player : MonoBehaviour, IDynamicObject
     public float drag;
     public float airDrag;
     public LayerMask groundMask;
+    public LayerMask collisionMask;
 
     [Header("References")]
     public GameObject meshPlayer;
     public GameObject meshPlayerHead;
+    public GameObject meshSpiritHead;
     public Transform directionRoot;
     public Transform renderRoot;
     public ParticleSystem dust;
@@ -33,7 +39,7 @@ public class Player : MonoBehaviour, IDynamicObject
     public Transform dirtHole;
 
     [HideInInspector] public PlayerInput input;
-    [HideInInspector] public Collider coll;
+    [HideInInspector] public CapsuleCollider coll;
     [HideInInspector] public Rigidbody rb;
     [HideInInspector] public CombatHandler combatHandler;
     [HideInInspector] public ObjectSounds sounds;
@@ -54,6 +60,7 @@ public class Player : MonoBehaviour, IDynamicObject
     public bool IsHeavyFalling => heavyFalling;
     public bool Sunk => sunkValue > 0f;
     public Screw Screw => currentScrew;
+    public bool SpiritMode => spirit;
 
     Timestamp gotHitTimer;
     Coroutine invulnerableBlinkCoroutine;
@@ -65,6 +72,7 @@ public class Player : MonoBehaviour, IDynamicObject
     Vector3 lastVelocity;
     bool grounded;
     bool heavyFalling;
+    bool spirit;
     float jumpValue;
     Vector3 checkpoint;
     MovingSurface movingSurface;
@@ -74,6 +82,7 @@ public class Player : MonoBehaviour, IDynamicObject
     Vector3 sunkPosition;
     Bounds nextFrameBounds;
     float bounceModifier;
+    bool tickMove;
 
     Vector3 moveVelocity;
     Vector3 verticalVelocity;
@@ -88,7 +97,7 @@ public class Player : MonoBehaviour, IDynamicObject
         Instance = this;
 
         rb = GetComponent<Rigidbody>();
-        coll = GetComponent<Collider>();
+        coll = GetComponent<CapsuleCollider>();
         input = GetComponent<PlayerInput>();
         combatHandler = GetComponent<CombatHandler>();
         sounds = GetComponent<ObjectSounds>();
@@ -102,6 +111,8 @@ public class Player : MonoBehaviour, IDynamicObject
         input.onMovementAxisMove += MoveAxis;
 
         combatHandler.OnGetHit += GetHit;
+
+        EnterSpiritMode();
     }
 
     #region Controls
@@ -124,10 +135,17 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         if (!PlayerInControl.True) return;
 
+        if (SpiritMode)
+        {
+            ExitSpiritMode();
+            Jump(jumpImpulse, true);
+            return;
+        }
+
         if (currentScrew != null)
         {
             ScrewOut();
-            Jump(jumpImpulse);
+            Jump(jumpImpulse, true);
             return;
         }
 
@@ -166,8 +184,9 @@ public class Player : MonoBehaviour, IDynamicObject
         lookDirection = dir;       
     }
     public void Move (Vector3 dir, float factor)
-    {
+    {   
         moveVelocity = dir * factor * moveSpeed;
+        tickMove = factor > 0f;
     }
     public void Jump() => Jump(jumpImpulse);
     public void Jump(float impulse, bool ignoreGrounded = false)
@@ -234,15 +253,49 @@ public class Player : MonoBehaviour, IDynamicObject
     }
     private void FixedUpdate()
     {
+        //Collider & RB Settings ----------------------------->
+
         if (rb.isKinematic)
         {
             moveVelocity = Vector3.zero;
             horizontalVelocity = Vector3.zero;
             verticalVelocity = Vector3.zero;
+            lastVelocity = Vector3.zero;
+            heavyFalling = false;
             return;
         }
+
+        coll.height = 
+            SpiritMode ? SPIRIT_HEIGHT : CHARACTER_HEIGHT;
+
         //Grounded Step ----------------------------->
-         bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
+
+        if (!SpiritMode)
+            StepGroundCheck();
+        else
+            ClearGroundData();
+
+        //Velocity Step ----------------------------->
+
+        Vector3 velocity = SpiritMode ? 
+            StepSpiritVelocity() : 
+            StepVelocity();
+
+        //Caches & Other ---------------------------------------------->
+        lastVelocity = velocity;
+
+        nextFrameBounds = coll.bounds;
+        nextFrameBounds.center += rb.linearVelocity * Time.fixedDeltaTime;
+        bounceModifier = Mathf.Clamp01(bounceModifier - Time.fixedDeltaTime);
+
+        if (!grounded && verticalVelocity.y <= -HEAVY_FALL_VELOCITY)
+            heavyFalling = true;
+
+        tickMove = false;
+    }
+    private void StepGroundCheck ()
+    {
+        bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
         if (newGrounded != grounded)
         {
             movingSurface = null;
@@ -274,16 +327,19 @@ public class Player : MonoBehaviour, IDynamicObject
         }
         grounded = newGrounded;
         groundData = groundChecker.GroundData;
-
-        //Velocity Step ----------------------------->
+    }
+    private Vector3 StepVelocity ()
+    {
         Vector3 velocity = Vector3.zero;
         Vector3 addedPosition = Vector3.zero;
-
-        bounceModifier = Mathf.Clamp01(bounceModifier - Time.fixedDeltaTime);
 
         if (grounded)
         {
             verticalVelocity.y = Mathf.Max(verticalVelocity.y, 0f);
+
+            moveVelocity = Vector3.zero;
+
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, drag * Time.fixedDeltaTime);
         }
         else
         {
@@ -292,23 +348,13 @@ public class Player : MonoBehaviour, IDynamicObject
                 downwardsGravity :
                 upwardsGravity * (1 - bounceModifier))
                 * Vector3.up * Time.fixedDeltaTime;
-        }
 
-        verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
-
-        if (grounded)
-        {
-            moveVelocity = Vector3.zero;
-            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, drag * Time.fixedDeltaTime);
-        }
-        else
-        {
             moveVelocity *= 1 + (bounceModifier * 0.6f);
+
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, Vector3.zero, airDrag * Time.fixedDeltaTime);
         }
 
-        if (!grounded && verticalVelocity.y <= -HEAVY_FALL_VELOCITY)
-            heavyFalling = true;
+        verticalVelocity.y = Mathf.Clamp(verticalVelocity.y, -MAX_GRAVITY, Mathf.Infinity);
 
         velocity += verticalVelocity;
         velocity += moveVelocity;
@@ -329,11 +375,43 @@ public class Player : MonoBehaviour, IDynamicObject
 
         rb.linearVelocity = velocity;
 
-        //Caches ---------------------------------------------->
-        lastVelocity = velocity;
+        return velocity;
+    }
+    private Vector3 StepSpiritVelocity ()
+    {
+        Vector3 velocity = Vector3.zero;
 
-        nextFrameBounds = coll.bounds;
-        nextFrameBounds.center += rb.linearVelocity * Time.fixedDeltaTime;
+        if (!tickMove)
+            moveVelocity = Vector3.zero;
+
+        horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, moveVelocity, SPIRIT_DAMPING * Time.fixedDeltaTime);
+        
+        RaycastHit r;
+        if (Physics.SphereCast(rb.position, 
+            SPIRIT_HEIGHT, 
+            horizontalVelocity.normalized, 
+            out r, 
+            horizontalVelocity.magnitude * Time.fixedDeltaTime,
+            collisionMask))
+        {
+            horizontalVelocity = 
+                Vector3.Reflect(horizontalVelocity.normalized, r.normal.FlattenY().normalized) 
+                * horizontalVelocity.magnitude * 1.2f;
+        }
+
+        velocity += horizontalVelocity;
+
+        rb.linearVelocity = velocity;
+        return velocity;
+    }
+    private void ClearGroundData ()
+    {
+        grounded = false;
+        groundData = null;
+
+        if (surfaceProperties != null) 
+            surfaceProperties.Leave(lastVelocity);
+        surfaceProperties = null;
     }
 
     #region Reactions
@@ -443,6 +521,19 @@ public class Player : MonoBehaviour, IDynamicObject
         currentScrew = null;
         renderRoot.localPosition = Vector3.zero;
         GetComponentInChildren<ObjectShadow>(true).gameObject.SetActive(true);
+    }
+    public void EnterSpiritMode ()
+    {
+        spirit = true;
+        meshSpiritHead.SetActive(true);
+        meshPlayer.SetActive(false);
+    }
+    public void ExitSpiritMode ()
+    {
+        spirit = false;
+        rb.MovePosition(rb.position + CHARACTER_HEIGHT * 0.5f * Vector3.up);
+        meshSpiritHead.SetActive(false);
+        meshPlayer.SetActive(true);
     }
 
     #endregion
