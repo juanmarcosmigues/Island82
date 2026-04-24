@@ -42,6 +42,10 @@ public class Screw : MonoBehaviour
     }
     private void FixedUpdate()
     {
+        if (Player.Instance.InsidePot) return;
+        if (Player.Instance.Sunk) return;
+        if (Player.Instance.SpiritMode) return;
+
         if (surfaceBase.landed || surfaceScrew.landed)
         {
             if (Player.Instance.Screw != this)

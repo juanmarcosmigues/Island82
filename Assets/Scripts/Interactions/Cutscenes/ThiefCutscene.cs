@@ -88,7 +88,7 @@ public class ThiefCutscene : Cutscene
     {
         Player player = Player.Instance;
 
-        while (!player.IsGrounded) yield return null;
+        while (!player.Grounded) yield return null;
 
         Vector3 jumpTarget = Vector3.zero;
         float minDelta = Mathf.Infinity;
@@ -111,7 +111,7 @@ public class ThiefCutscene : Cutscene
             player.Move(jumpDir.normalized, 1f);
             yield return new WaitForFixedUpdate();   
 
-        } while (!player.IsGrounded);
+        } while (!player.Grounded);
 
 
     }

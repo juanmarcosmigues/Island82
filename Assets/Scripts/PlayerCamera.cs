@@ -11,7 +11,7 @@ public class PlayerCamera : MonoBehaviour
         Vector3 newPos = Player.Instance.transform.position.FlattenY();
         if (Camera.main.WorldToViewportPoint(Player.Instance.transform.position).y > 0.5f)
         {
-            if (Player.Instance.IsGrounded)
+            if (Player.Instance.Grounded)
                 if (Mathf.Abs(Player.Instance.transform.position.y - heightTarget) > 0.9f)
                     heightTarget = Player.Instance.transform.position.y;
 

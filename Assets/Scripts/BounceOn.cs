@@ -16,7 +16,7 @@ public class BounceOn : JumpOn
 
     public void Bounce ()
     {
-        if (!Player.Instance.IsHeavyFalling || dontBounceOnHeavyFall)
+        if (!Player.Instance.HeavyFalling || dontBounceOnHeavyFall)
             Player.Instance.BounceOff();
 
         if (anim != null)

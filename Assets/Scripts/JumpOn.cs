@@ -33,9 +33,9 @@ public class JumpOn : MonoBehaviour, ITrigger
     {
         return
         (ignoreIntersection || IsPlayerIntersecting()) && //Is now intersecting?
-        !Player.Instance.IsGrounded && //Is airborne
+        !Player.Instance.Grounded && //Is airborne
         Player.Instance.VerticalVelocity < 3f && //Is kinda falling? 
-        (onlyHeavyFall && Player.Instance.IsHeavyFalling || !onlyHeavyFall); //Heavy falling evaluation
+        (onlyHeavyFall && Player.Instance.HeavyFalling || !onlyHeavyFall); //Heavy falling evaluation
     }
     bool IsPlayerIntersecting()
     {

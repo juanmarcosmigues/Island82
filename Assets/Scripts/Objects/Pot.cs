@@ -3,6 +3,7 @@ using static CombatHandler;
 
 public class Pot : MonoBehaviour
 {
+    public int life;
     public Mesh[] meshes;
     public MeshFilter mesh;
     public ParticleSystem breakParticles;
@@ -10,37 +11,38 @@ public class Pot : MonoBehaviour
     public BoxCollider trigger;
     public BoxCollider coll;
     public Animation anim;
-    public CombatHandler combatHandler;
     public Vector3 parentOffset;
     [Range(0f, 1f)]
     public float dropChance;
     public string drop;
 
+    JumpOn jumpOn;
     bool playerInside;
-    int life;
+    int currentLife;
     Timestamp timer;
 
     private void Awake()
     {
+        jumpOn = GetComponent<JumpOn>();    
         trigger.isTrigger = true;
-        life = meshes.Length;
-        combatHandler.OnGetHit += GetHit;
-    }
-    private void FixedUpdate()
-    {
-        if (playerInside) return;
+        currentLife = life;
 
-        if ((coll.bounds.max.y - Player.Instance.coll.bounds.min.y) <= 0.01f  && 
-            Player.Instance.VerticalVelocity < 1f && 
-            trigger.bounds.Intersects(Player.Instance.coll.bounds))
-        {
+        jumpOn.OnJumpedOn += JumpedOn;
+    }
+    void JumpedOn (JumpOn _)
+    {
+        if (Player.Instance.SpiritMode) return;
+        if (Player.Instance.InsidePot) return;
+
+        if (Player.Instance.HeavyFalling)
+            Break();
+        else
             PlayerIn();
-        }
     }
     void PlayerIn()
     {
         coll.enabled = false;
-        Player.Instance.InsideObject(true);
+        Player.Instance.EnterPot(this);
         transform.SetParent(Player.Instance.transform);
         transform.localPosition = parentOffset;
         anim.Play();
@@ -50,20 +52,28 @@ public class Pot : MonoBehaviour
 
         enabled = false;
         playerInside = true;
+        jumpOn.enabled =false;
     }
 
-    void Land ()
+    void Land (Vector3 velocity, bool heavyFall)
     {
         if (timer.elapsed < 0.2f) return;
 
-        life--;
-        if (life <= 0 )
+        if (!heavyFall)
+            RecieveDamage();
+        else
+            Break();
+    }
+    public void RecieveDamage ()
+    {
+        currentLife--;
+        if (currentLife <= 0)
         {
             Break();
         }
         else
         {
-            mesh.mesh = meshes[meshes.Length-life];
+            mesh.mesh = meshes[Mathf.FloorToInt((1 - currentLife / (float)life) * meshes.Length)];
             breakParticles.Play();
             anim.Play();
         }
@@ -72,7 +82,7 @@ public class Pot : MonoBehaviour
     {
         if (playerInside)
         {
-            Player.Instance.InsideObject(false);
+            Player.Instance.ExitPot();
             Player.Instance.OnGroundedStart -= Land;
             transform.SetParent(null);
 
@@ -87,9 +97,5 @@ public class Pot : MonoBehaviour
         {
             PoolManager.Instance.GetPool<ObjectPool>(drop).GetObject().transform.position = transform.position;
         }
-    }
-    void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
-    {
-        Break();
     }
 }

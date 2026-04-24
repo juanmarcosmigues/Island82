@@ -45,7 +45,7 @@ public class Player : MonoBehaviour, IDynamicObject
     [HideInInspector] public ObjectSounds sounds;
     [HideInInspector] public CheckGround groundChecker;
 
-    public event System.Action OnGroundedStart;
+    public event System.Action<Vector3, bool> OnGroundedStart;
 
     private List<IInteractable> availableInteractions = new();
 
@@ -56,11 +56,13 @@ public class Player : MonoBehaviour, IDynamicObject
     public Vector3 LookingDirection => directionRoot.forward;
     public Bounds NextFrameBounds => nextFrameBounds;
     public float VerticalVelocity => verticalVelocity.y;
-    public bool IsGrounded => grounded;
-    public bool IsHeavyFalling => heavyFalling;
+
+    public bool Grounded => grounded;
+    public bool HeavyFalling => heavyFalling;
     public bool Sunk => sunkValue > 0f;
-    public Screw Screw => currentScrew;
     public bool SpiritMode => spirit;
+    public bool InsidePot => insidePot;
+    public Screw Screw => currentScrew;
 
     Timestamp gotHitTimer;
     Coroutine invulnerableBlinkCoroutine;
@@ -73,6 +75,7 @@ public class Player : MonoBehaviour, IDynamicObject
     bool grounded;
     bool heavyFalling;
     bool spirit;
+    bool insidePot;
     float jumpValue;
     Vector3 checkpoint;
     MovingSurface movingSurface;
@@ -90,6 +93,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
     float pickUpCoinCombo;
 
+    Pot currentPot;
     Screw currentScrew;
 
     private void Awake()
@@ -111,8 +115,6 @@ public class Player : MonoBehaviour, IDynamicObject
         input.onMovementAxisMove += MoveAxis;
 
         combatHandler.OnGetHit += GetHit;
-
-        EnterSpiritMode();
     }
 
     #region Controls
@@ -420,13 +422,6 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         if (Invulnerable) { return; }
 
-        CurrentLife -= damage;
-        Invulnerable = true;
-        gotHitTimer.Set(TIME_INVULNERABLE);
-
-        invulnerableBlinkCoroutine =
-            StartCoroutine(renderRoot.gameObject.Blink(0.05f, TIME_INVULNERABLE));
-
         float knockbackForce = SPEED_KNOCKBACK;
         knockbackForce *= weight switch
         {
@@ -436,6 +431,21 @@ public class Player : MonoBehaviour, IDynamicObject
             _ => 1.0f
         };
         knockbackForce *= knockback ? 1f : 0f;
+
+        if (InsidePot)
+        {
+            currentPot.RecieveDamage();
+            horizontalVelocity += 
+                (transform.position - source.transform.position).FlattenY().normalized * knockbackForce;
+            return;
+        }
+
+        CurrentLife -= damage;
+        Invulnerable = true;
+        gotHitTimer.Set(TIME_INVULNERABLE);
+
+        invulnerableBlinkCoroutine =
+            StartCoroutine(renderRoot.gameObject.Blink(0.05f, TIME_INVULNERABLE));      
 
         FrameFreeze.Freeze(0.3f, () =>
         {
@@ -450,39 +460,6 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         GetHit(null, 1, Weight.Light, "Fall", false);
         transform.position = checkpoint;      
-    }
-    public void Sink  (SurfaceProperties surface, GroundData ground)
-    {
-        sunkValue = 1f;
-        rb.isKinematic = true;
-        directionRoot.localPosition = -SINK_HEIGHT * Vector3.up;
-        dirtHole.gameObject.SetActive(true);
-
-        sunkPosition = transform.position;
-        sunkPosition.y = ground.point.y;
-
-        dirtHole.transform.rotation = Quaternion.LookRotation(directionRoot.forward, ground.normal);
-        //dirtHole.transform.position = sunkPosition;
-
-        MainCameraShaker.instance.Shake(0.2f, 0.3f, 0.2f);
-    }
-    public void UnSink ()
-    {
-        sunkValue -= 0.3f;
-        directionRoot.localPosition = -SINK_HEIGHT * sunkValue * Vector3.up;
-        dirtHole.gameObject.SetActive(false);
-
-        if (sunkValue <= 0.1f)
-        {
-            sunkValue = 0f;
-            directionRoot.localPosition = Vector3.zero;
-            rb.isKinematic = false;
-            Jump(jumpImpulse * 0.5f);         
-        }
-        else
-        {
-            dirtHole.gameObject.SetActive(true);
-        }
     }
     public void BounceOff()
     {
@@ -503,10 +480,21 @@ public class Player : MonoBehaviour, IDynamicObject
 
         GameplayManager.Instance?.AddCoins(1);
     }
-    public void InsideObject(bool inside)
+    public void EnterPot(Pot pot)
     {
-        meshPlayer.SetActive(!inside);
-        meshPlayerHead.SetActive(inside);
+        insidePot = true;
+        meshPlayer.SetActive(false);
+        meshPlayerHead.SetActive(true);
+
+        currentPot = pot;
+    }
+    public void ExitPot ()
+    {
+        insidePot = false;
+        meshPlayer.SetActive(true);
+        meshPlayerHead.SetActive(false);
+
+        currentPot = null;
     }
     public void ScrewIn (Screw screw)
     {
@@ -521,6 +509,39 @@ public class Player : MonoBehaviour, IDynamicObject
         currentScrew = null;
         renderRoot.localPosition = Vector3.zero;
         GetComponentInChildren<ObjectShadow>(true).gameObject.SetActive(true);
+    }
+    public void Sink(SurfaceProperties surface, GroundData ground)
+    {
+        sunkValue = 1f;
+        rb.isKinematic = true;
+        directionRoot.localPosition = -SINK_HEIGHT * Vector3.up;
+        dirtHole.gameObject.SetActive(true);
+
+        sunkPosition = transform.position;
+        sunkPosition.y = ground.point.y;
+
+        dirtHole.transform.rotation = Quaternion.LookRotation(directionRoot.forward, ground.normal);
+        //dirtHole.transform.position = sunkPosition;
+
+        MainCameraShaker.instance.Shake(0.2f, 0.3f, 0.2f);
+    }
+    public void UnSink()
+    {
+        sunkValue -= 0.3f;
+        directionRoot.localPosition = -SINK_HEIGHT * sunkValue * Vector3.up;
+        dirtHole.gameObject.SetActive(false);
+
+        if (sunkValue <= 0.1f)
+        {
+            sunkValue = 0f;
+            directionRoot.localPosition = Vector3.zero;
+            rb.isKinematic = false;
+            Jump(jumpImpulse * 0.5f);
+        }
+        else
+        {
+            dirtHole.gameObject.SetActive(true);
+        }
     }
     public void EnterSpiritMode ()
     {
@@ -561,7 +582,7 @@ public class Player : MonoBehaviour, IDynamicObject
         surfaceProperties = surface;
         movingSurface = groundData.Value.coll.GetComponent<MovingSurface>();
 
-
+        bool lastHeavyFalling = heavyFalling;
         if (heavyFalling)
         {
             Sink(surface, ground);
@@ -586,7 +607,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
         sounds.PlaySound(sound);
 
-        OnGroundedStart?.Invoke();
+        OnGroundedStart?.Invoke(lastVelocity, lastHeavyFalling);
         dust.Play();
     }
     IEnumerator PerfectBounceAnimation (float duration)
