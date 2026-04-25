@@ -10164,11 +10164,11 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 192
-  maxGroundAngle: 20
+  maxGroundAngle: 25
   autoCheck: 0
-  debug: 1
+  debug: 0
   checkOffset: 0.1
-  checkIndent: 0.9
+  checkIndent: 0.6
 --- !u!1 &5634750701356016263
 GameObject:
   m_ObjectHideFlags: 0

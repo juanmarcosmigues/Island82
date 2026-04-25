@@ -16,12 +16,13 @@ public class Pot : MonoBehaviour
     public float dropChance;
     public string drop;
 
-    JumpOn jumpOn;
-    bool playerInside;
-    int currentLife;
-    Timestamp timer;
+    protected JumpOn jumpOn;
+    protected bool playerInside;
+    protected int currentLife;
+    protected Timestamp timer;
+    protected Timestamp timerDamage;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         jumpOn = GetComponent<JumpOn>();    
         trigger.isTrigger = true;
@@ -29,7 +30,7 @@ public class Pot : MonoBehaviour
 
         jumpOn.OnJumpedOn += JumpedOn;
     }
-    void JumpedOn (JumpOn _)
+    protected virtual void JumpedOn (JumpOn _)
     {
         if (Player.Instance.SpiritMode) return;
         if (Player.Instance.InsidePot) return;
@@ -39,7 +40,7 @@ public class Pot : MonoBehaviour
         else
             PlayerIn();
     }
-    void PlayerIn()
+    protected virtual void PlayerIn()
     {
         coll.enabled = false;
         Player.Instance.EnterPot(this);
@@ -50,22 +51,25 @@ public class Pot : MonoBehaviour
 
         Player.Instance.OnGroundedStart += Land;
 
-        enabled = false;
         playerInside = true;
         jumpOn.enabled =false;
     }
 
-    void Land (Vector3 velocity, bool heavyFall)
+    protected virtual void Land (Vector3 velocity, bool heavyFall)
     {
-        if (timer.elapsed < 0.2f) return;
-
-        if (!heavyFall)
-            RecieveDamage();
-        else
+        if (heavyFall)
+        {
             Break();
+            return;
+        }
+
+        if (timer.elapsed < 0.2f) return;
+        RecieveDamage();
     }
     public void RecieveDamage ()
     {
+        if (timerDamage.elapsed < 0.2f) return;
+
         currentLife--;
         if (currentLife <= 0)
         {
@@ -77,8 +81,10 @@ public class Pot : MonoBehaviour
             breakParticles.Play();
             anim.Play();
         }
+
+        timerDamage.Set();
     }
-    void Break ()
+    protected void Break ()
     {
         if (playerInside)
         {

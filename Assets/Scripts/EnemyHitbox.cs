@@ -44,10 +44,12 @@ public class EnemyHitbox : MonoBehaviour
     }
     private IEnumerator HitPlayerEvaluation()
     {
+        Debug.Log("starting damage");
         if (Player.Instance.Invulnerable) yield break;
+        Debug.Log("starting damage 2");
         yield return new WaitForFixedUpdate();
         if (jumpOn != null && jumpOn.timerJumpedOn.elapsed < 0.1f) yield break; //Wait a frame and favour bounce instead of hit
-
+        Debug.Log("starting damage 3");
         var combatHandler = Player.Instance.GetComponent<CombatHandler>();
         combatHandler.GetHit(gameObject, damage, weight, hitboxTag);
 

@@ -46,6 +46,7 @@ public class Player : MonoBehaviour, IDynamicObject
     [HideInInspector] public CheckGround groundChecker;
 
     public event System.Action<Vector3, bool> OnGroundedStart;
+    public event System.Action OnPlayerJump;
 
     private List<IInteractable> availableInteractions = new();
 
@@ -56,6 +57,8 @@ public class Player : MonoBehaviour, IDynamicObject
     public Vector3 LookingDirection => directionRoot.forward;
     public Bounds NextFrameBounds => nextFrameBounds;
     public float VerticalVelocity => verticalVelocity.y;
+    public Vector3 HorizontalVelocity => horizontalVelocity;
+    public Vector3 MoveVelocity => moveVelocity;
 
     public bool Grounded => grounded;
     public bool HeavyFalling => heavyFalling;
@@ -154,6 +157,7 @@ public class Player : MonoBehaviour, IDynamicObject
         if (grounded)
         {
             Jump(jumpImpulse);
+            OnPlayerJump?.Invoke();
         }
         else
         {
@@ -220,6 +224,14 @@ public class Player : MonoBehaviour, IDynamicObject
 
         verticalVelocity.y *= 0.5f;
     }
+    public void SetVerticalForce(float force)
+    {
+        verticalVelocity.y = force;
+    }
+    public void SetHorizontalForce (Vector3 velocity)
+    {
+        horizontalVelocity = velocity.FlattenY();
+    }
 
     #endregion
 
@@ -240,10 +252,14 @@ public class Player : MonoBehaviour, IDynamicObject
             directionRoot.forward = Quaternion.AngleAxis(saturatedAngle, Vector3.up) * forward;
         }
 
-        if (gotHitTimer.remainingTime < 0f && invulnerableBlinkCoroutine != null)
+        if (gotHitTimer.remainingTime < 0f && Invulnerable)
         {
-            StopCoroutine(invulnerableBlinkCoroutine);
-            invulnerableBlinkCoroutine = null;
+            if (invulnerableBlinkCoroutine != null)
+            {
+                StopCoroutine(invulnerableBlinkCoroutine);
+                invulnerableBlinkCoroutine = null;
+            }
+
             renderRoot.gameObject.SetActive(true);
             Invulnerable = false;
         }
@@ -366,9 +382,6 @@ public class Player : MonoBehaviour, IDynamicObject
         Vector3 nextFeetPosition = nextPosition - coll.bounds.extents.y * Vector3.up;
         if (grounded)
         {
-            //Ground Snap
-            if (verticalVelocity.y <= 0f)
-                addedPosition += (groundData.Value.point.y - nextFeetPosition.y) * Vector3.up;
             if (movingSurface)
                 addedPosition += movingSurface.GetFinalFrameTranslation(transform.position);
         }
@@ -518,10 +531,10 @@ public class Player : MonoBehaviour, IDynamicObject
         dirtHole.gameObject.SetActive(true);
 
         sunkPosition = transform.position;
-        sunkPosition.y = ground.point.y;
+        sunkPosition.y = ground.point.y - 0.01f;
 
         dirtHole.transform.rotation = Quaternion.LookRotation(directionRoot.forward, ground.normal);
-        //dirtHole.transform.position = sunkPosition;
+        dirtHole.transform.position = sunkPosition;
 
         MainCameraShaker.instance.Shake(0.2f, 0.3f, 0.2f);
     }
@@ -581,6 +594,18 @@ public class Player : MonoBehaviour, IDynamicObject
         checkpoint = transform.position;
         surfaceProperties = surface;
         movingSurface = groundData.Value.coll.GetComponent<MovingSurface>();
+
+        // --- Snap position to ground BEFORE firing events ---
+        // Using transform.position instead of rb.position because when the rb is kinematic it doesnt work
+        Vector3 feetPos = transform.position - coll.bounds.extents.y * Vector3.up;
+        float yOffset = ground.point.y - feetPos.y;
+        if (yOffset != 0f)
+            transform.position += Vector3.up * yOffset;
+
+        // Zero downward velocity so handlers start from a clean state.
+        // (They're free to overwrite it with an upward bounce impulse.)
+        if (verticalVelocity.y < 0f)
+            verticalVelocity.y = 0f;
 
         bool lastHeavyFalling = heavyFalling;
         if (heavyFalling)

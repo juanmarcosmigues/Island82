@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 8571570881012183995}
   - component: {fileID: 8490063416392476019}
   - component: {fileID: 7468974574421117687}
-  - component: {fileID: 3710314721970111186}
   - component: {fileID: 436706916466429623}
-  m_Layer: 8
+  - component: {fileID: 6832935947485937806}
+  m_Layer: 7
   m_Name: Pot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cda750c14f46004d9c095328d48dbd2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pot
-  life: 6
+  life: 9
   meshes:
   - {fileID: -4942402031117993904, guid: aa300884f58fb994a970e1c5e2a395fd, type: 3}
   - {fileID: -7133215529975611989, guid: aa300884f58fb994a970e1c5e2a395fd, type: 3}
@@ -121,18 +121,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Entity
   type: 2
   customTag: Pot
---- !u!114 &3710314721970111186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 742385923677317176}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4bc35f953bafeed4bb28f9993694e6f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CombatHandler
 --- !u!114 &436706916466429623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,6 +136,20 @@ MonoBehaviour:
   trigger: {fileID: 759366152975184034}
   onlyHeavyFall: 0
   debug: 0
+--- !u!114 &6832935947485937806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 742385923677317176}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa684132d4f727143817ef9d6bc7e652, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurfaceProperties
+  material: 1
+  jumpOn: {fileID: 436706916466429623}
 --- !u!1 &1694861920631456506
 GameObject:
   m_ObjectHideFlags: 0
