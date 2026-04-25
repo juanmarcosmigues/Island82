@@ -70,3 +70,22 @@ public static class Vector3Extensions
         return false;
     }
 }
+
+public static class Directions8
+{
+    public static readonly Vector3 Forward = Vector3.forward;
+    public static readonly Vector3 ForwardRight = new Vector3(0.7071068f, 0f, 0.7071068f);
+    public static readonly Vector3 Right = Vector3.right;
+    public static readonly Vector3 BackRight = new Vector3(0.7071068f, 0f, -0.7071068f);
+    public static readonly Vector3 Back = Vector3.back;
+    public static readonly Vector3 BackLeft = new Vector3(-0.7071068f, 0f, -0.7071068f);
+    public static readonly Vector3 Left = Vector3.left;
+    public static readonly Vector3 ForwardLeft = new Vector3(-0.7071068f, 0f, 0.7071068f);
+
+    /// <summary>All eight, in the order: F, FR, R, BR, B, BL, L, FL (clockwise from forward).</summary>
+    public static readonly Vector3[] All =
+    {
+        Forward, ForwardRight, Right, BackRight,
+        Back, BackLeft, Left, ForwardLeft
+    };
+}

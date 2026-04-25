@@ -69,47 +69,46 @@ namespace Utils
 			DrawWireArc(center, radius, 360, segments, rotation);
 		}
 
-		/// <summary>
-		/// Draws an arc with a rotation around the center
-		/// </summary>
-		/// <param name="center">center point</param>
-		/// <param name="radius">radiu</param>
-		/// <param name="angle">angle in degrees</param>
-		/// <param name="segments">number of segments</param>
-		/// <param name="rotation">rotation around the center</param>
-		public static void DrawWireArc(Vector3 center, float radius, float angle, int segments = 20,
-			Quaternion rotation = default(Quaternion))
-		{
-			var old = Gizmos.matrix;
+        /// <summary>
+        /// Draws an arc with a rotation around the center
+        /// </summary>
+        /// <param name="center">center point</param>
+        /// <param name="radius">radiu</param>
+        /// <param name="angle">angle in degrees</param>
+        /// <param name="segments">number of segments</param>
+        /// <param name="rotation">rotation around the center</param>
+        public static void DrawWireArc(Vector3 center, float radius, float angle, int segments = 20,
+            Quaternion rotation = default)
+        {
+            if (segments < 1) segments = 1;
+            if (rotation.Equals(default(Quaternion))) rotation = Quaternion.identity;
 
-			// Check if the rotation is the default Quaternion (identity), and if so, set it to Quaternion.identity
-			if (rotation.Equals(default(Quaternion)))
-				rotation = Quaternion.identity;
+            var old = Gizmos.matrix;
+            Gizmos.matrix = Matrix4x4.TRS(center, rotation, Vector3.one);
 
-			Gizmos.matrix = Matrix4x4.TRS(center, rotation, Vector3.one);
-			Vector3 from = Vector3.forward * radius;
-			var step = Mathf.RoundToInt(angle / segments);
-			for (int i = 0; i <= angle; i += step)
-			{
-				var to = new Vector3(radius * Mathf.Sin(i * Mathf.Deg2Rad), 0, radius * Mathf.Cos(i * Mathf.Deg2Rad));
-				Gizmos.DrawLine(from, to);
-				from = to;
-			}
+            Vector3 from = new Vector3(0f, 0f, radius); // i = 0 position
+            for (int i = 1; i <= segments; i++)
+            {
+                float a = (i / (float)segments) * angle * Mathf.Deg2Rad;
+                Vector3 to = new Vector3(radius * Mathf.Sin(a), 0f, radius * Mathf.Cos(a));
+                Gizmos.DrawLine(from, to);
+                from = to;
+            }
 
-			Gizmos.matrix = old;
-		}
+            Gizmos.matrix = old;
+        }
 
 
-		/// <summary>
-		/// Draws an arc with a rotation around an arbitraty center of rotation
-		/// </summary>
-		/// <param name="center">the circle's center point</param>
-		/// <param name="radius">radius</param>
-		/// <param name="angle">angle in degrees</param>
-		/// <param name="segments">number of segments</param>
-		/// <param name="rotation">rotation around the centerOfRotation</param>
-		/// <param name="centerOfRotation">center of rotation</param>
-		public static void DrawWireArc(Vector3 center, float radius, float angle, int segments, Quaternion rotation, Vector3 centerOfRotation)
+        /// <summary>
+        /// Draws an arc with a rotation around an arbitraty center of rotation
+        /// </summary>
+        /// <param name="center">the circle's center point</param>
+        /// <param name="radius">radius</param>
+        /// <param name="angle">angle in degrees</param>
+        /// <param name="segments">number of segments</param>
+        /// <param name="rotation">rotation around the centerOfRotation</param>
+        /// <param name="centerOfRotation">center of rotation</param>
+        public static void DrawWireArc(Vector3 center, float radius, float angle, int segments, Quaternion rotation, Vector3 centerOfRotation)
 		{
 
 			var old = Gizmos.matrix;
