@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utils;
 
 public class EnemyHand : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class EnemyHand : MonoBehaviour
     public float followSpeed;
     public RangeValue spawnTimeRange;
     public Arc catchArc;
+    public float catchRadius;
     public LayerMask solidMask;
 
     private bool active;
@@ -52,9 +54,9 @@ public class EnemyHand : MonoBehaviour
         Vector3 delta = player.transform.position - transform.position;
         float dist = delta.magnitude;
         float speed = Mathf.Lerp(0.1f, 1f, (dist - innerRadius) / 2f);
-        Quaternion rot = Quaternion.RotateTowards(rigidBody.rotation,
+        Quaternion rot = Quaternion.Lerp(rigidBody.rotation,
             Quaternion.LookRotation(delta.FlattenY().normalized, Vector3.up),
-            speed * 1.5f);
+            speed * speed * 10f * Time.fixedDeltaTime);
 
         rigidBody.linearVelocity = delta.normalized * speed;
         rigidBody.MoveRotation(rot);
@@ -117,6 +119,7 @@ public class EnemyHand : MonoBehaviour
     }
     private void OnDrawGizmos()
     {
-       catchArc.Debug(transform.position, transform.rotation, Color.red);
+        catchArc.Debug(transform.position, transform.rotation, Color.red);
+        GizmosExtensions.DrawWireCircle(transform.position, catchRadius);
     }
 }

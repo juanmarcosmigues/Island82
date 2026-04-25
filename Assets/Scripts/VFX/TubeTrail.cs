@@ -39,11 +39,11 @@ public class TubeTrail : MonoBehaviour
     {
         public Vector3 pos;
         public float birth;
+        public Vector3 up;   // parallel-transported up vector, frozen at insertion time
     }
 
     private readonly List<Point> points = new List<Point>();
     private Mesh mesh;
-    private Vector3 prevRingUp = Vector3.up;
 
     void Awake()
     {
@@ -62,7 +62,7 @@ public class TubeTrail : MonoBehaviour
             if (points.Count == 0 ||
                 (points[points.Count - 1].pos - p).sqrMagnitude >= minVertexDistance * minVertexDistance)
             {
-                points.Add(new Point { pos = p, birth = Time.time });
+                AddPoint(p);
             }
         }
 
@@ -75,14 +75,11 @@ public class TubeTrail : MonoBehaviour
         }
         else // ByDistance
         {
-            // Walk from newest backwards, accumulating segment lengths.
-            // Drop everything past maxLength, then move the new tail point
-            // exactly to the maxLength mark for a clean cutoff.
             if (points.Count >= 2 && maxLength > 0f)
             {
                 float accum = 0f;
-                int keepFrom = 0;          // oldest index we'll keep
-                float overshoot = 0f;       // how far past maxLength the kept tail sits
+                int keepFrom = 0;
+                float overshoot = 0f;
                 for (int i = points.Count - 1; i > 0; i--)
                 {
                     float seg = Vector3.Distance(points[i].pos, points[i - 1].pos);
@@ -99,8 +96,6 @@ public class TubeTrail : MonoBehaviour
                 if (keepFrom > 0)
                     points.RemoveRange(0, keepFrom);
 
-                // Slide the oldest point toward its neighbor so the trail ends
-                // exactly at maxLength rather than past it.
                 if (overshoot > 0f && points.Count >= 2)
                 {
                     Vector3 a = points[0].pos;
@@ -109,13 +104,59 @@ public class TubeTrail : MonoBehaviour
                     if (seg > 1e-6f)
                     {
                         float t = Mathf.Clamp01(overshoot / seg);
-                        points[0] = new Point { pos = Vector3.Lerp(a, b, t), birth = points[0].birth };
+                        var p0 = points[0];
+                        p0.pos = Vector3.Lerp(a, b, t);
+                        points[0] = p0;
                     }
                 }
             }
         }
 
         BuildMesh();
+    }
+
+    /// <summary>
+    /// Add a point and compute its up vector via parallel transport from the
+    /// previous point's stored up. This is the only place orientation is
+    /// computed, so once a point is in the list its frame is frozen.
+    /// </summary>
+    void AddPoint(Vector3 pos)
+    {
+        Vector3 up;
+        if (points.Count == 0)
+        {
+            // No previous direction — placeholder up; will be re-orthogonalized
+            // against the actual tangent in BuildMesh.
+            up = Vector3.up;
+        }
+        else
+        {
+            Vector3 lastPos = points[points.Count - 1].pos;
+            Vector3 lastUp = points[points.Count - 1].up;
+            Vector3 tangent = pos - lastPos;
+            float len = tangent.magnitude;
+            if (len < 1e-6f)
+            {
+                up = lastUp;
+            }
+            else
+            {
+                tangent /= len;
+                // Project last up onto plane perpendicular to tangent
+                up = lastUp - Vector3.Dot(lastUp, tangent) * tangent;
+                if (up.sqrMagnitude < 1e-6f)
+                {
+                    // Last up was (almost) parallel to tangent — pick any perpendicular
+                    Vector3 alt = Vector3.Cross(tangent, Vector3.right);
+                    if (alt.sqrMagnitude < 1e-6f)
+                        alt = Vector3.Cross(tangent, Vector3.up);
+                    up = alt;
+                }
+                up.Normalize();
+            }
+        }
+
+        points.Add(new Point { pos = pos, birth = Time.time, up = up });
     }
 
     void BuildMesh()
@@ -132,12 +173,9 @@ public class TubeTrail : MonoBehaviour
         var colors = new Color32[vertCount];
         var triangles = new int[triCount];
 
-        // Reset orientation reference each rebuild so the tube is stable
-        Vector3 up = prevRingUp;
-
         for (int i = 0; i < ringCount; i++)
         {
-            // Tangent: forward direction along the trail
+            // Tangent: forward direction along the trail (from neighbors)
             Vector3 tangent;
             if (i == 0)
                 tangent = (points[1].pos - points[0].pos).normalized;
@@ -148,12 +186,16 @@ public class TubeTrail : MonoBehaviour
 
             if (tangent.sqrMagnitude < 1e-8f) tangent = Vector3.forward;
 
-            // Parallel transport: project up onto plane perpendicular to tangent
-            up = up - Vector3.Dot(up, tangent) * tangent;
+            // Use the point's stored up, re-orthogonalized against the current
+            // tangent. The stored up was parallel-transported at insertion time,
+            // so it's already nearly perpendicular and stable across frames.
+            Vector3 up = points[i].up - Vector3.Dot(points[i].up, tangent) * tangent;
             if (up.sqrMagnitude < 1e-6f)
-                up = Vector3.Cross(tangent, Vector3.right).sqrMagnitude > 1e-6f
-                    ? Vector3.Cross(tangent, Vector3.right)
-                    : Vector3.Cross(tangent, Vector3.up);
+            {
+                up = Vector3.Cross(tangent, Vector3.right);
+                if (up.sqrMagnitude < 1e-6f)
+                    up = Vector3.Cross(tangent, Vector3.up);
+            }
             up.Normalize();
             Vector3 right = Vector3.Cross(tangent, up);
 
@@ -161,8 +203,7 @@ public class TubeTrail : MonoBehaviour
             float t01 = (float)i / (ringCount - 1);
             float radius = Mathf.Lerp(endWidth, startWidth, t01) * 0.5f;
 
-            // Evaluate gradient and pack as raw sRGB bytes — bypasses any
-            // automatic gamma conversion so vertex colors match imported FBX meshes.
+            // Evaluate gradient and pack as raw sRGB bytes
             Color c = colorOverLife.Evaluate(1f - t01);
             Color32 c32 = new Color32(
                 (byte)(Mathf.Clamp01(c.r) * 255f),
@@ -171,7 +212,6 @@ public class TubeTrail : MonoBehaviour
                 (byte)(Mathf.Clamp01(c.a) * 255f)
             );
 
-            // World-space center, converted to local space of this GameObject
             Vector3 centerLocal = transform.InverseTransformPoint(points[i].pos);
             Vector3 upLocal = transform.InverseTransformDirection(up);
             Vector3 rightLocal = transform.InverseTransformDirection(right);
@@ -186,7 +226,6 @@ public class TubeTrail : MonoBehaviour
                 colors[baseIndex + j] = c32;
             }
         }
-        prevRingUp = up;
 
         // Stitch rings into quads
         int ti = 0;
