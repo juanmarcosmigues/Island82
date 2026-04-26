@@ -50,7 +50,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
     private List<IInteractable> availableInteractions = new();
 
-    public bool PlayerRotation {  get; set; } = true;
+    public bool PlayerRotation { get; set; } = true;
     public GatedBool PlayerInControl { get; } = new();
     public int CurrentLife { get; private set; } = 5;
     public bool Invulnerable { get; private set; } = false;
@@ -126,9 +126,9 @@ public class Player : MonoBehaviour, IDynamicObject
         string interactables = "Interactions List: \n";
         availableInteractions.ForEach(x => interactables += x.InteractionName + "\n");
         Debug.Log(interactables);
-        if (availableInteractions.Count > 0) 
+        if (availableInteractions.Count > 0)
         {
-            var interactionIndex = availableInteractions.Count-1;
+            var interactionIndex = availableInteractions.Count - 1;
             var interaction = availableInteractions.Last();
             interaction.Interact();
 
@@ -136,7 +136,7 @@ public class Player : MonoBehaviour, IDynamicObject
                 availableInteractions.RemoveAt(interactionIndex);
         }
     }
-    private void PressJump ()
+    private void PressJump()
     {
         if (!PlayerInControl.True) return;
 
@@ -164,11 +164,11 @@ public class Player : MonoBehaviour, IDynamicObject
             pressedJumpTimer.Set(0.1f);
         }
     }
-    private void ReleaseJump (float time)
+    private void ReleaseJump(float time)
     {
         JumpStop();
     }
-    private void MoveAxis (Vector2 input, float val)
+    private void MoveAxis(Vector2 input, float val)
     {
         if (!PlayerInControl.True) return;
         if (Sunk) return;
@@ -185,12 +185,12 @@ public class Player : MonoBehaviour, IDynamicObject
         if (val > 0.1f) Move(dir, val);
         else Move(dir, 0f);
     }
-    public void LookAt (Vector3 dir)
+    public void LookAt(Vector3 dir)
     {
-        lookDirection = dir;       
+        lookDirection = dir;
     }
-    public void Move (Vector3 dir, float factor)
-    {   
+    public void Move(Vector3 dir, float factor)
+    {
         moveVelocity = dir * factor * moveSpeed;
         tickMove = factor > 0f;
     }
@@ -201,8 +201,8 @@ public class Player : MonoBehaviour, IDynamicObject
         {
             UnSink();
             return;
-        } 
-        
+        }
+
         if (grounded || ignoreGrounded)
         {
             currentJumpForce = impulse;
@@ -217,7 +217,7 @@ public class Player : MonoBehaviour, IDynamicObject
         jumpValue = Mathf.Clamp01(jumpValue - Time.deltaTime);
         verticalVelocity.y = currentJumpForce * jumpValue;
     }
-    public void JumpStop ()
+    public void JumpStop()
     {
         if (verticalVelocity.y < 0)
             return;
@@ -228,7 +228,7 @@ public class Player : MonoBehaviour, IDynamicObject
     {
         verticalVelocity.y = force;
     }
-    public void SetHorizontalForce (Vector3 velocity)
+    public void SetHorizontalForce(Vector3 velocity)
     {
         horizontalVelocity = velocity.FlattenY();
     }
@@ -283,7 +283,7 @@ public class Player : MonoBehaviour, IDynamicObject
             return;
         }
 
-        coll.height = 
+        coll.height =
             SpiritMode ? SPIRIT_HEIGHT : CHARACTER_HEIGHT;
 
         //Grounded Step ----------------------------->
@@ -295,8 +295,8 @@ public class Player : MonoBehaviour, IDynamicObject
 
         //Velocity Step ----------------------------->
 
-        Vector3 velocity = SpiritMode ? 
-            StepSpiritVelocity() : 
+        Vector3 velocity = SpiritMode ?
+            StepSpiritVelocity() :
             StepVelocity();
 
         //Caches & Other ---------------------------------------------->
@@ -311,7 +311,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
         tickMove = false;
     }
-    private void StepGroundCheck ()
+    private void StepGroundCheck()
     {
         bool newGrounded = verticalVelocity.y <= 0f ? groundChecker.Check(lastVelocity) : false;
         if (newGrounded != grounded)
@@ -346,7 +346,7 @@ public class Player : MonoBehaviour, IDynamicObject
         grounded = newGrounded;
         groundData = groundChecker.GroundData;
     }
-    private Vector3 StepVelocity ()
+    private Vector3 StepVelocity()
     {
         Vector3 velocity = Vector3.zero;
         Vector3 addedPosition = Vector3.zero;
@@ -392,7 +392,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
         return velocity;
     }
-    private Vector3 StepSpiritVelocity ()
+    private Vector3 StepSpiritVelocity()
     {
         Vector3 velocity = Vector3.zero;
 
@@ -400,17 +400,17 @@ public class Player : MonoBehaviour, IDynamicObject
             moveVelocity = Vector3.zero;
 
         horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, moveVelocity, SPIRIT_DAMPING * Time.fixedDeltaTime);
-        
+
         RaycastHit r;
-        if (Physics.SphereCast(rb.position, 
-            SPIRIT_HEIGHT, 
-            horizontalVelocity.normalized, 
-            out r, 
+        if (Physics.SphereCast(rb.position,
+            SPIRIT_HEIGHT,
+            horizontalVelocity.normalized,
+            out r,
             horizontalVelocity.magnitude * Time.fixedDeltaTime,
             collisionMask))
         {
-            horizontalVelocity = 
-                Vector3.Reflect(horizontalVelocity.normalized, r.normal.FlattenY().normalized) 
+            horizontalVelocity =
+                Vector3.Reflect(horizontalVelocity.normalized, r.normal.FlattenY().normalized)
                 * horizontalVelocity.magnitude * 1.2f;
         }
 
@@ -419,21 +419,23 @@ public class Player : MonoBehaviour, IDynamicObject
         rb.linearVelocity = velocity;
         return velocity;
     }
-    private void ClearGroundData ()
+    private void ClearGroundData()
     {
         grounded = false;
         groundData = null;
 
-        if (surfaceProperties != null) 
+        if (surfaceProperties != null)
             surfaceProperties.Leave(lastVelocity);
         surfaceProperties = null;
     }
 
     #region Reactions
 
-    void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true)
+    public void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true) 
+        => GetHit(source, damage, weight, tag, knockback, false);
+    public void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true, bool ignoreInvulnerable = false)
     {
-        if (Invulnerable) { return; }
+        if (Invulnerable && !ignoreInvulnerable) { return; }
 
         float knockbackForce = SPEED_KNOCKBACK;
         knockbackForce *= weight switch
@@ -448,7 +450,7 @@ public class Player : MonoBehaviour, IDynamicObject
         if (InsidePot)
         {
             currentPot.RecieveDamage();
-            horizontalVelocity += 
+            horizontalVelocity +=
                 (transform.position - source.transform.position).FlattenY().normalized * knockbackForce;
             return;
         }
@@ -458,7 +460,7 @@ public class Player : MonoBehaviour, IDynamicObject
         gotHitTimer.Set(TIME_INVULNERABLE);
 
         invulnerableBlinkCoroutine =
-            StartCoroutine(renderRoot.gameObject.Blink(0.05f, TIME_INVULNERABLE));      
+            StartCoroutine(renderRoot.gameObject.Blink(0.05f, TIME_INVULNERABLE));
 
         FrameFreeze.Freeze(0.3f, () =>
         {
@@ -469,10 +471,10 @@ public class Player : MonoBehaviour, IDynamicObject
 
         GameplayManager.Instance?.PlayerHurt(this, damage);
     }
-    public void OutOfBounds ()
+    public void OutOfBounds()
     {
         GetHit(null, 1, Weight.Light, "Fall", false);
-        transform.position = checkpoint;      
+        transform.position = checkpoint;
     }
     public void BounceOff()
     {
@@ -501,7 +503,7 @@ public class Player : MonoBehaviour, IDynamicObject
 
         currentPot = pot;
     }
-    public void ExitPot ()
+    public void ExitPot()
     {
         insidePot = false;
         meshPlayer.SetActive(true);
@@ -509,14 +511,14 @@ public class Player : MonoBehaviour, IDynamicObject
 
         currentPot = null;
     }
-    public void ScrewIn (Screw screw)
+    public void ScrewIn(Screw screw)
     {
         rb.isKinematic = true;
         currentScrew = screw;
         renderRoot.localPosition = Vector3.up * -0.2f;
         GetComponentInChildren<ObjectShadow>(true).gameObject.SetActive(false);
     }
-    public void ScrewOut ()
+    public void ScrewOut()
     {
         rb.isKinematic = false;
         currentScrew = null;
@@ -556,20 +558,31 @@ public class Player : MonoBehaviour, IDynamicObject
             dirtHole.gameObject.SetActive(true);
         }
     }
-    public void EnterSpiritMode ()
+    public void EnterSpiritMode()
     {
         spirit = true;
         meshSpiritHead.SetActive(true);
         meshPlayer.SetActive(false);
     }
-    public void ExitSpiritMode ()
+    public void ExitSpiritMode()
     {
         spirit = false;
         rb.MovePosition(rb.position + CHARACTER_HEIGHT * 0.5f * Vector3.up);
         meshSpiritHead.SetActive(false);
         meshPlayer.SetActive(true);
     }
-
+    public void Grabbed()
+    {
+        rb.isKinematic = true;
+        coll.enabled = false;
+        PlayerInControl.Set(false, "Grabbed");
+    }
+    public void Released()
+    {
+        rb.isKinematic = false;
+        coll.enabled = true;
+        PlayerInControl.Set(true, "Grabbed");
+    }
     #endregion
 
     public void AddInteraction (IInteractable interactable)

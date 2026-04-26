@@ -5,7 +5,14 @@ using Utils;
 
 public class EnemyHand : MonoBehaviour
 {
+    private const float GRAB_DURATION = 4f;
+
     public GameObject hand;
+    public Mesh meshHandRest;
+    public Mesh meshHandGrab;
+    public MeshFilter handMesh;
+    public Transform handRoot;
+    public Transform grabTarget;
     public RangeValue spawnRadius;
     public float innerRadius;
     public float followSpeed;
@@ -15,6 +22,7 @@ public class EnemyHand : MonoBehaviour
     public LayerMask solidMask;
 
     private bool active;
+    private bool grabbing;
     private Player player;
     private Rigidbody rigidBody;
     private Collider coll;
@@ -32,13 +40,17 @@ public class EnemyHand : MonoBehaviour
     }
     private void Update()
     {
+        if (grabbing) return;
+
         if (!active)
             DisabledUpdated();
     }
     private void FixedUpdate()
     {
+        if (grabbing) return;
+
         if (active)
-            ActiveUpdate();      
+            ActiveUpdate();
     }
     void DisabledUpdated ()
     {          
@@ -57,13 +69,16 @@ public class EnemyHand : MonoBehaviour
         Quaternion rot = Quaternion.Lerp(rigidBody.rotation,
             Quaternion.LookRotation(delta.FlattenY().normalized, Vector3.up),
             speed * speed * 10f * Time.fixedDeltaTime);
+        float handRotLerp = 1-Mathf.InverseLerp(catchArc.radius, catchArc.radius * 2f, dist);
+        handRoot.localRotation = Quaternion.AngleAxis(Mathf.Lerp(0, 40f, handRotLerp), Vector3.right);
 
         rigidBody.linearVelocity = delta.normalized * speed;
         rigidBody.MoveRotation(rot);
 
-        if (catchArc.Contains(rigidBody.position, rigidBody.rotation, player.transform.position))
+        if (catchArc.Contains(rigidBody.position, rigidBody.rotation, player.transform.position) 
+            || dist < catchRadius)
         {
-
+            GrabPlayer();
         }
 
         if (timerSinceSpawn.remainingTime < 0f && dist > spawnRadius.min)
@@ -99,24 +114,88 @@ public class EnemyHand : MonoBehaviour
 
         if (spawns.Count <= 0) return;
 
-        StartCoroutine(_Spawn(spawns[Random.Range(0, spawns.Count)]));
-    }
+        StartCoroutine(_(spawns[Random.Range(0, spawns.Count)]));
 
-    IEnumerator _Spawn (Vector3 pos)
+        IEnumerator _(Vector3 pos)
+        {
+            Vector3 dir = pos - player.transform.position;
+            trail.Clear();
+            timerSinceSpawn.Set(5f);
+            transform.position = pos + dir * 10f;
+            hand.SetActive(true);
+            coll.enabled = true;
+            rigidBody.isKinematic = false;
+            active = true;
+
+            yield return null;
+
+            transform.position = pos;
+        }
+    }
+    public void GrabPlayer ()
     {
-        Vector3 dir = pos - player.transform.position;
-        trail.Clear();
-        timerSinceSpawn.Set(5f);
-        transform.position = pos + dir * 10f;
-        hand.SetActive(true);
-        coll.enabled = true;
-        rigidBody.isKinematic = false;
-        active = true;
+        coll.enabled = false;
+        rigidBody.isKinematic = true;
 
-        yield return null;
+        handMesh.mesh = meshHandGrab;
+        handRoot.localRotation = Quaternion.Euler(0f, 90f, 90f);
+        handRoot.localPosition = Vector3.up * -0.2f;
 
-        transform.position = pos;
+        Vector3 delta = player.transform.position - grabTarget.position;
+        Vector3 point = transform.position + delta * 0.5f;
+        point.y = transform.position.y;
+        transform.position = point;
+
+        player.Grabbed();
+        player.transform.SetParent(grabTarget);
+        player.transform.localPosition = Vector3.zero;
+        player.transform.localRotation = Quaternion.identity;
+
+        grabbing = true;
+
+        StartCoroutine(Shake(GRAB_DURATION, handRoot));
+        StartCoroutine(Damage(GRAB_DURATION, 3));
+
+        IEnumerator Damage (float duration, int amount)
+        {
+            float t = 0f;
+            float interval = duration / amount;
+
+            while
+                (t < duration)
+            {
+                yield return new WaitForSeconds(interval);
+                t += interval;
+                player.GetHit(this.gameObject, 1, CombatHandler.Weight.Light, "MonsterHand", false, true);
+            }
+        }
+
+        IEnumerator Shake (float duration, Transform target)
+        {
+            float f = 0.1f;
+            float t = 0f;
+
+            Vector3 pos = new Vector3(-1, 0, 1);
+            Vector3 originalPos = target.localPosition;
+
+            while (t < duration)
+            {
+                pos *= -1f;
+                pos.Normalize();
+
+                pos *= 0.07f;
+
+                target.localPosition = originalPos + pos;
+
+                yield return new WaitForSeconds(f);
+
+                t += f;
+            }
+
+            target.localPosition = originalPos;
+        }
     }
+
     private void OnDrawGizmos()
     {
         catchArc.Debug(transform.position, transform.rotation, Color.red);
