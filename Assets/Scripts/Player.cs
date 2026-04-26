@@ -44,6 +44,7 @@ public class Player : MonoBehaviour, IDynamicObject
     [HideInInspector] public CombatHandler combatHandler;
     [HideInInspector] public ObjectSounds sounds;
     [HideInInspector] public CheckGround groundChecker;
+    [HideInInspector] public PlayerCamera playerCamera;
 
     public event System.Action<Vector3, bool> OnGroundedStart;
     public event System.Action OnPlayerJump;
@@ -65,6 +66,7 @@ public class Player : MonoBehaviour, IDynamicObject
     public bool Sunk => sunkValue > 0f;
     public bool SpiritMode => spirit;
     public bool InsidePot => insidePot;
+    public bool Grabbed => grabbed;
     public Screw Screw => currentScrew;
 
     Timestamp gotHitTimer;
@@ -79,6 +81,7 @@ public class Player : MonoBehaviour, IDynamicObject
     bool heavyFalling;
     bool spirit;
     bool insidePot;
+    bool grabbed;
     float jumpValue;
     Vector3 checkpoint;
     MovingSurface movingSurface;
@@ -109,6 +112,7 @@ public class Player : MonoBehaviour, IDynamicObject
         combatHandler = GetComponent<CombatHandler>();
         sounds = GetComponent<ObjectSounds>();
         groundChecker = GetComponent<CheckGround>();
+        playerCamera = FindFirstObjectByType<PlayerCamera>();
     }
     private void Start()
     {
@@ -118,6 +122,8 @@ public class Player : MonoBehaviour, IDynamicObject
         input.onMovementAxisMove += MoveAxis;
 
         combatHandler.OnGetHit += GetHit;
+
+        Shader.SetGlobalFloat("_DarkRoomFactor", 1f);
     }
 
     #region Controls
@@ -267,7 +273,8 @@ public class Player : MonoBehaviour, IDynamicObject
         if (pickUpCoinCombo > 0f)
             pickUpCoinCombo = Mathf.Clamp01(pickUpCoinCombo - Time.deltaTime * 0.5f);
 
-        Shader.SetGlobalVector("_PlayerPosition", transform.position);
+        if (!grabbed)
+            Shader.SetGlobalVector("_PlayerPosition", transform.position);
     }
     private void FixedUpdate()
     {
@@ -571,17 +578,24 @@ public class Player : MonoBehaviour, IDynamicObject
         meshSpiritHead.SetActive(false);
         meshPlayer.SetActive(true);
     }
-    public void Grabbed()
+    public void EnterGrabbed()
     {
         rb.isKinematic = true;
         coll.enabled = false;
         PlayerInControl.Set(false, "Grabbed");
+        meshPlayer.GetComponent<MeshRenderer>().material =
+            GameStaticAssets.Get<Material>
+            (GameDefinitions.GAME_ASSET_MATERIAL_DARKROOM);
+        playerCamera.enabled = false;
+
+        grabbed = true;
     }
-    public void Released()
+    public void ExitGrabbed()
     {
         rb.isKinematic = false;
         coll.enabled = true;
         PlayerInControl.Set(true, "Grabbed");
+        grabbed = false;
     }
     #endregion
 

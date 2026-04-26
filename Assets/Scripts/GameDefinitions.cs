@@ -13,4 +13,7 @@ public static class GameDefinitions
     public const string LAYER_TRIGGER = "Trigger";
 
     public const int UI_CHARACTERS_PER_SECOND = 30;
+
+    public const string GAME_ASSET_MATERIAL_DEFAULT = "Material_Default";
+    public const string GAME_ASSET_MATERIAL_DARKROOM = "Material_DarkRoom";
 }

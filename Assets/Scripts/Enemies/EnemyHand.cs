@@ -63,7 +63,9 @@ public class EnemyHand : MonoBehaviour
     }
     void ActiveUpdate ()
     {
-        Vector3 delta = player.transform.position - transform.position;
+        Vector3 targetPosition = player.transform.position;
+        targetPosition.y += 0.5f;
+        Vector3 delta = targetPosition - transform.position;
         float dist = delta.magnitude;
         float speed = Mathf.Lerp(0.1f, 1f, (dist - innerRadius) / 2f);
         Quaternion rot = Quaternion.Lerp(rigidBody.rotation,
@@ -71,8 +73,10 @@ public class EnemyHand : MonoBehaviour
             speed * speed * 10f * Time.fixedDeltaTime);
         float handRotLerp = 1-Mathf.InverseLerp(catchArc.radius, catchArc.radius * 2f, dist);
         handRoot.localRotation = Quaternion.AngleAxis(Mathf.Lerp(0, 40f, handRotLerp), Vector3.right);
+        Vector3 velocity = delta.FlattenY().normalized * speed;
+        velocity.y = delta.y * 0.2f;
 
-        rigidBody.linearVelocity = delta.normalized * speed;
+        rigidBody.linearVelocity = velocity;
         rigidBody.MoveRotation(rot);
 
         if (catchArc.Contains(rigidBody.position, rigidBody.rotation, player.transform.position) 
@@ -146,7 +150,7 @@ public class EnemyHand : MonoBehaviour
         point.y = transform.position.y;
         transform.position = point;
 
-        player.Grabbed();
+        player.EnterGrabbed();
         player.transform.SetParent(grabTarget);
         player.transform.localPosition = Vector3.zero;
         player.transform.localRotation = Quaternion.identity;
@@ -155,6 +159,7 @@ public class EnemyHand : MonoBehaviour
 
         StartCoroutine(Shake(GRAB_DURATION, handRoot));
         StartCoroutine(Damage(GRAB_DURATION, 3));
+        StartCoroutine(Leave(GRAB_DURATION));
 
         IEnumerator Damage (float duration, int amount)
         {
@@ -172,7 +177,7 @@ public class EnemyHand : MonoBehaviour
 
         IEnumerator Shake (float duration, Transform target)
         {
-            float f = 0.1f;
+            float f = 0.05f;
             float t = 0f;
 
             Vector3 pos = new Vector3(-1, 0, 1);
@@ -193,6 +198,45 @@ public class EnemyHand : MonoBehaviour
             }
 
             target.localPosition = originalPos;
+        }
+
+        IEnumerator Leave (float duration)
+        {
+            Vector3 originPoint = transform.position;
+            Vector3 currentPos = originPoint;
+            Vector3 currentDirection = transform.forward;
+
+            yield return null;
+
+            trail.emitting = false;
+            float t = 0f;
+            float factor = 0f;
+            float lightValue = 1f;
+            float lightSteps = 1f / 10f;
+            float dist = float.MaxValue;
+
+            while (t < 1f && lightValue > 0f)
+            {
+                t = Mathf.Clamp01(t + Time.deltaTime * 0.05f * factor);
+                factor = Mathf.Clamp01(factor + Time.deltaTime / 4f);
+
+                if (t > 0.1f)
+                    lightValue = Mathf.Clamp01(lightValue - Time.deltaTime/3f);
+
+                trail.GetTipAtOffset(t, out currentPos, out currentDirection);
+                trail.offset = t;
+                transform.position = currentPos - trail.transform.localPosition;
+                transform.forward = currentDirection;
+
+                dist = (originPoint - transform.position).magnitude;
+
+                float steppedLightValue = Mathf.FloorToInt(lightValue / lightSteps) * lightSteps;
+                Shader.SetGlobalFloat("_DarkRoomFactor", steppedLightValue);
+
+                yield return null;
+            }
+
+            SceneTransitioner.ReloadScene(1,1,1);
         }
     }
 

@@ -43,6 +43,7 @@ Shader "Aftersun/Vertex Color Dark Room"
             float _LightRadius;
             float _RingWidth;
             float3 _PlayerPosition;
+            float _DarkRoomFactor;
 
             // 4x4 Bayer matrix normalized to 0-1
             static const float4x4 bayerMatrix = float4x4(
@@ -83,9 +84,11 @@ Shader "Aftersun/Vertex Color Dark Room"
                 //   dist <= _LightRadius                        ? full color
                 //   dist <= _LightRadius + _RingWidth           ? 50% dither
                 //   dist >  _LightRadius + _RingWidth           ? full darkness
-                float outerEdge = _LightRadius + _RingWidth;
+                float lightRadius = _LightRadius * _DarkRoomFactor;
+                float ringWidth = _RingWidth * _DarkRoomFactor;
+                float outerEdge = lightRadius + ringWidth;
 
-                if (dist <= _LightRadius)
+                if (dist <= lightRadius)
                 {
                     // inside light — keep col as is
                 }

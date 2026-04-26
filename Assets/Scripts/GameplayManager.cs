@@ -4,6 +4,7 @@ public class GameplayManager : MonoBehaviour
 {
     public static GameplayManager Instance { get; private set; }
 
+    public SingletonGameObject singletonComponent;
     public int playerCurrency;
     public float runTime;
 
@@ -12,6 +13,8 @@ public class GameplayManager : MonoBehaviour
 
     private void Awake()
     {
+        if (singletonComponent.queuedToBeDestroyed) return;
+
         Instance = this;
     }
     public int GetRuntime()

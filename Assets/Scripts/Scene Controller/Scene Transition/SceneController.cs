@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SceneController : MonoBehaviour
 {
+    public static SceneController Instance { get; private set; }
+
     public string sceneID;
     public KeyItemPair<Transform>[] spawnPoints;
     public Transform playerGroup;
@@ -27,6 +29,8 @@ public class SceneController : MonoBehaviour
     }
     public virtual void OnSceneStart (string fromScene = "")
     {
+        Instance = this;
+
         if (spawnPointsDict.ContainsKey(fromScene))
         {
             playerGroup.transform.position = spawnPointsDict[fromScene].position;
