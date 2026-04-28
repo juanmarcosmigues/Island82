@@ -6,6 +6,8 @@ using Utils;
 public class EnemyHand : MonoBehaviour
 {
     private const float GRAB_DURATION = 4f;
+    private const float TO_GRAB_TIME = 0.4f;
+    private const float MAX_LIVE_TIME = 25f;
 
     public GameObject hand;
     public Mesh meshHandRest;
@@ -30,6 +32,7 @@ public class EnemyHand : MonoBehaviour
     private Timestamp timerToSpawn;
     private Timestamp timerSinceSpawn;
     private Timestamp timerTrySpawn;
+    private float toGrabTime;
 
     private void Start()
     {
@@ -75,19 +78,33 @@ public class EnemyHand : MonoBehaviour
         handRoot.localRotation = Quaternion.AngleAxis(Mathf.Lerp(0, 40f, handRotLerp), Vector3.right);
         Vector3 velocity = delta.FlattenY().normalized * speed;
         velocity.y = delta.y * 0.2f;
+        bool onVerticalPlane = Mathf.Abs(delta.y) < 0.5f;
 
         rigidBody.linearVelocity = velocity;
         rigidBody.MoveRotation(rot);
 
-        if (catchArc.Contains(rigidBody.position, rigidBody.rotation, player.transform.position) 
-            || dist < catchRadius)
+        if (onVerticalPlane && 
+            catchArc.Contains(rigidBody.position, rigidBody.rotation, player.transform.position))
+        {
+            toGrabTime += Time.fixedDeltaTime;
+        }
+        else
+        {
+            toGrabTime -= Time.fixedDeltaTime;
+            toGrabTime = Mathf.Max(toGrabTime, 0f);
+        }
+
+        if (toGrabTime >= TO_GRAB_TIME || 
+            (dist < catchRadius && onVerticalPlane))
         {
             GrabPlayer();
         }
 
-        if (timerSinceSpawn.remainingTime < 0f && dist > spawnRadius.min)
+        if ((timerSinceSpawn.elapsed > MAX_LIVE_TIME && dist > spawnRadius.min * 0.5f)
+            || (timerSinceSpawn.elapsed > MAX_LIVE_TIME * 0.5f && Mathf.Abs(delta.y) > 3f)
+            || timerSinceSpawn.remainingTime < 0f && dist > spawnRadius.min)
         {
-            Despawn();
+            Leave();
         }
     }
     public void Despawn ()
@@ -125,8 +142,11 @@ public class EnemyHand : MonoBehaviour
             Vector3 dir = pos - player.transform.position;
             trail.Clear();
             timerSinceSpawn.Set(5f);
+            toGrabTime = 0f;
             transform.position = pos + dir * 10f;
             hand.SetActive(true);
+            trail.emitting = true;
+            trail.offset = 0f;
             coll.enabled = true;
             rigidBody.isKinematic = false;
             active = true;
@@ -237,6 +257,39 @@ public class EnemyHand : MonoBehaviour
             }
 
             SceneTransitioner.ReloadScene(1,1,1);
+        }
+    }
+    public void Leave ()
+    {
+        enabled = false;
+
+        StartCoroutine(_(2f));
+        IEnumerator _(float duration)
+        {
+            Vector3 originPoint = transform.position;
+            Vector3 currentPos = originPoint;
+            Vector3 currentDirection = transform.forward;
+
+            trail.emitting = false;
+            coll.enabled = false;
+            float t = 0f;
+            float factor = 0f;
+
+            while (t < 1f)
+            {
+                t = Mathf.Clamp01(t + (Time.deltaTime / duration) * factor);
+                factor = Mathf.Clamp01(factor + Time.deltaTime * 2f);
+
+                trail.GetTipAtOffset(t, out currentPos, out currentDirection);
+                trail.offset = t;
+                transform.position = currentPos - trail.transform.localPosition;
+                transform.forward = currentDirection;
+
+                yield return null;
+            }
+
+            Despawn();
+            enabled = true;
         }
     }
 

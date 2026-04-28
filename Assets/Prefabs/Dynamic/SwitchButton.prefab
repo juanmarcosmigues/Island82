@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6378896720547582254}
   - component: {fileID: 691681181491016893}
+  - component: {fileID: 5411792134921865060}
   m_Layer: 0
   m_Name: SwitchButton
   m_TagString: Untagged
@@ -48,17 +49,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SwitchButton
   elasticValue:
-    currentValue: 0
+    currentValue: 1
     currentVelocity: 0
-    snappingThreshold: 0
-    target: 0
-    magneticForce: 0
-    damping: 0
-  dust: {fileID: 0}
-  pressedHeight: 0.04
+    snappingThreshold: 0.01
+    target: 1
+    magneticForce: 50
+    damping: 0.05
+  dust: {fileID: 792949879396763116}
+  surfaceTransform: {fileID: 251482947120632678}
   OnPressed:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5411792134921865060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1794066325154364677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b07243ad1f6f244cbf40484d470b272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectSounds
+  clip:
+  - key: Pressed
+    value: {fileID: 8300000, guid: fb663c23b72b56a408b2c34718121393, type: 3}
+  - key: Squeak
+    value: {fileID: 8300000, guid: 7561cdeb70400aa48a22cc046756d0e3, type: 3}
 --- !u!1 &3554458867230674973
 GameObject:
   m_ObjectHideFlags: 0
@@ -385,7 +403,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1050395259597624904, guid: ef059608de6dc0642a7f7855b82aafcd, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.037
+      value: 0.111
       objectReference: {fileID: 0}
     - target: {fileID: 1050395259597624904, guid: ef059608de6dc0642a7f7855b82aafcd, type: 3}
       propertyPath: m_LocalPosition.z
@@ -476,6 +494,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ef059608de6dc0642a7f7855b82aafcd, type: 3}
+--- !u!198 &792949879396763116 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 3654458883857825597, guid: ef059608de6dc0642a7f7855b82aafcd, type: 3}
+  m_PrefabInstance: {fileID: 4158547903016581841}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3973830343108963481 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1050395259597624904, guid: ef059608de6dc0642a7f7855b82aafcd, type: 3}

@@ -3,56 +3,65 @@ using UnityEngine.Events;
 
 public class SwitchButton : MonoBehaviour
 {
+    private const float DURATION = 0.5f;
+    private const float PRESSED_HEIGHT = 0.09f;
+
     public ElasticFloat elasticValue;
     public ParticleSystem dust;
-    public float pressedHeight = 0.04f;
+    public Transform surfaceTransform;
 
     public UnityEvent OnPressed;
 
     private bool pressed;
-    private float startHeight;
-    private SurfaceProperties nail;
+    private bool goingDown;
+
+    private SurfaceProperties switchSurface;
+    private ObjectSounds sound;
+    private Vector3 startPos;
+    private Vector3 endPos;
 
     private void Awake()
     {
-        nail = GetComponentInChildren<SurfaceProperties>();
-        nail.OnLanded += Landed;
-
-        startHeight = nail.transform.localPosition.y;
+        switchSurface = surfaceTransform.GetComponent<SurfaceProperties>();
+        sound = GetComponent<ObjectSounds>();
+        switchSurface.OnLanded += _ => sound.PlaySound("Squeak", 0.8f, 0.9f);
+        startPos = surfaceTransform.localPosition;
+        endPos = Vector3.up * PRESSED_HEIGHT;
     }
 
     private void FixedUpdate()
     {
-        if (elasticValue.Value <= 0.13f && !pressed)
+        if (elasticValue.Value > 0.7f && !goingDown)
         {
-            pressed = true;
-            nail.transform.localPosition = Vector3.up * pressedHeight;
-            MainCameraShaker.instance.Shake(0.1f, 0.2f, 0.1f);
-            dust.gameObject.SetActive(true);   
-
-            OnPressed?.Invoke();
-
-            enabled = false;
-        }
-
-        if (!pressed)
-        {
-            if (nail.landed)
+            if (switchSurface.landed)
             {
-                elasticValue.target = 0.8f;
+                elasticValue.target = 0.7f;
             }
             else
             {
                 elasticValue.target = 1f;
             }
-            elasticValue.Update(Time.fixedDeltaTime);
-
-            nail.transform.localPosition = Vector3.up * Mathf.LerpUnclamped(pressedHeight, startHeight, elasticValue.Value);
         }
-    }
-    void Landed (Vector3 vel)
-    {
-        if (vel.y <= -Player.HEAVY_FALL_VELOCITY * 0.8f)
-            elasticValue.ApplyForce(-10f);
+        else if (!goingDown)
+        {
+            goingDown = true;
+            elasticValue.target = 0f;
+            sound.PlaySound("Pressed", 0.6f);
+        }
+
+        elasticValue.Update(Time.fixedDeltaTime);
+        surfaceTransform.localPosition = Vector3.Lerp(startPos, endPos, 1 - elasticValue.Value);
+
+        if (elasticValue.Value <= 0.13f && !pressed)
+        {
+            pressed = true;
+            surfaceTransform.localPosition = endPos;
+            MainCameraShaker.instance.Shake(0.1f, 0.2f, 0.1f);
+            dust.gameObject.SetActive(true);
+
+            OnPressed?.Invoke();
+
+            enabled = false;
+        }
     }
 }
