@@ -6,6 +6,9 @@ Shader "Aftersun/Vertex Color Water"
         _LightChange ("Light Change", Float) = 3
         _Waves ("Waves", Vector) = (0,0,0,0)
         _Noise ("Noise", 2D) = "black" {}
+
+        [Header(Dark Room)]
+        [Toggle(_DARKROOM_ON)] _DarkRoom ("Enable Dark Room", Float) = 0
     }
     SubShader
     {
@@ -20,10 +23,15 @@ Shader "Aftersun/Vertex Color Water"
             #pragma fragment frag
             // make fog work
             #pragma multi_compile_fog
+            // dark room toggle keyword (driven by the [Toggle] attribute above)
+            #pragma shader_feature_local _DARKROOM_ON
 
             #include "UnityCG.cginc"
             #include "cginc/VertexWiggle.cginc"
             #include "cginc/Utils.cginc"
+            #if defined(_DARKROOM_ON)
+            #include "cginc/DarkRoom.cginc"
+            #endif
 
             struct appdata
             {
@@ -34,6 +42,9 @@ Shader "Aftersun/Vertex Color Water"
             struct v2f
             {
                 float4 col : COLOR;
+            #if defined(_DARKROOM_ON)
+                float3 worldPos : TEXCOORD2;
+            #endif
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
             };
@@ -65,8 +76,13 @@ Shader "Aftersun/Vertex Color Water"
 
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 
-                //o.vertex = VertexWiggle(v.vertex);
                 o.col = v.col;
+
+            #if defined(_DARKROOM_ON)
+                // Use the pre-displacement world pos so the light circle
+                // doesn't wobble along with the wave displacement.
+                o.worldPos = worldPos;
+            #endif
 
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
@@ -80,6 +96,11 @@ Shader "Aftersun/Vertex Color Water"
                 float3 vertCol = GAMMA_CORRECTION(i.col);
                 float lightChange = sin(steppedTime);
                 col.xyz = lerp(vertCol, _OverrideColor, lerp(0, 0.5, lightChange));
+
+            #if defined(_DARKROOM_ON)
+                col = ApplyDarkRoom(col, i.worldPos, i.vertex.xy);
+            #endif
+
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

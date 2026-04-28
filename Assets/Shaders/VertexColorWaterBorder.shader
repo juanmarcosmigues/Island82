@@ -7,6 +7,9 @@ Shader "Aftersun/Vertex Color Water Border"
         _Noise ("Noise", 2D) = "black" {}
         _Speed ("Scroll Speed", Float) = 0.5
         _Amount ("Amount", Range(0,1)) = 1
+
+        [Header(Dark Room)]
+        [Toggle(_DARKROOM_ON)] _DarkRoom ("Enable Dark Room", Float) = 0
     }
     SubShader
     {
@@ -21,9 +24,14 @@ Shader "Aftersun/Vertex Color Water Border"
             #pragma fragment frag
             // make fog work
             #pragma multi_compile_fog
+            // dark room toggle keyword (driven by the [Toggle] attribute above)
+            #pragma shader_feature_local _DARKROOM_ON
 
             #include "UnityCG.cginc"
             #include "cginc/Utils.cginc"
+            #if defined(_DARKROOM_ON)
+            #include "cginc/DarkRoom.cginc"
+            #endif
 
             struct appdata
             {
@@ -73,6 +81,11 @@ Shader "Aftersun/Vertex Color Water Border"
                 float3 vertCol = GAMMA_CORRECTION(i.col);
                 float lightChange = sin(steppedTime);
                 col.xyz = lerp(vertCol, _OverrideColor, lerp(0, 0.5, lightChange));
+
+            #if defined(_DARKROOM_ON)
+                col = ApplyDarkRoom(col, i.worldPos, i.vertex.xy);
+            #endif
+
                 // apply fog
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;

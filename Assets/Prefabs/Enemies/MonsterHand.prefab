@@ -112,6 +112,7 @@ MonoBehaviour:
   resolution: 4
   startWidth: 0.7
   endWidth: 0.7
+  offset: 0
   colorOverLife:
     serializedVersion: 2
     key0: {r: 0.105882354, g: 0.18431373, b: 0.14117648, a: 1}
@@ -298,8 +299,8 @@ MonoBehaviour:
   innerRadius: 2.4
   followSpeed: 3
   spawnTimeRange:
-    min: 3
-    max: 6
+    min: 4
+    max: 7
   catchArc:
     angle: 120
     radius: 1.7

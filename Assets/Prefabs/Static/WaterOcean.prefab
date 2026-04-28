@@ -4925,13 +4925,46 @@ PrefabInstance:
       propertyPath: m_Name
       value: waterOcean
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: bd2d2c30bf98f764db0e0eee0a557056, type: 3}
+      propertyPath: m_Layer
+      value: 4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bd2d2c30bf98f764db0e0eee0a557056, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4196989926553305614}
   m_SourcePrefab: {fileID: 100100000, guid: bd2d2c30bf98f764db0e0eee0a557056, type: 3}
 --- !u!4 &6315591496848280749 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bd2d2c30bf98f764db0e0eee0a557056, type: 3}
   m_PrefabInstance: {fileID: 5778052884778445638}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &6696480658223453719 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: bd2d2c30bf98f764db0e0eee0a557056, type: 3}
+  m_PrefabInstance: {fileID: 5778052884778445638}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &4196989926553305614
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6696480658223453719}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 6.004346, y: 6.0035906, z: 0.1}
+  m_Center: {x: -2.4991698, y: 2.498206, z: 0.032393035}
