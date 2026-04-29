@@ -719,6 +719,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameplayManager
   singletonComponent: {fileID: 7826903293820946165}
   playerCurrency: 0
+  playerMaxLife: 5
+  playerLife: 0
   runTime: 0
 --- !u!1 &8023035463697083300
 GameObject:

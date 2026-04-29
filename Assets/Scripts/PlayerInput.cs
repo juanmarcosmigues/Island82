@@ -28,6 +28,7 @@ public class PlayerInput : MonoBehaviour
             new InputTrigger("RightTrigger", inputActions.Player.RightTrigger),
             new InputButton("D-PadL", inputActions.Player.PadL),
             new InputButton("D-PadR", inputActions.Player.PadR),
+            new InputAxisAsButton("Move", inputActions.Player.Move)
         };
     }
     protected virtual void OnEnable()

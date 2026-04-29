@@ -53,7 +53,6 @@ public class Player : MonoBehaviour, IDynamicObject
 
     public bool PlayerRotation { get; set; } = true;
     public GatedBool PlayerInControl { get; } = new();
-    public int CurrentLife { get; private set; } = 5;
     public bool Invulnerable { get; private set; } = false;
     public Vector3 LookingDirection => directionRoot.forward;
     public Bounds NextFrameBounds => nextFrameBounds;
@@ -462,7 +461,6 @@ public class Player : MonoBehaviour, IDynamicObject
             return;
         }
 
-        CurrentLife -= damage;
         Invulnerable = true;
         gotHitTimer.Set(TIME_INVULNERABLE);
 
@@ -474,9 +472,19 @@ public class Player : MonoBehaviour, IDynamicObject
             MainCameraShaker.instance.Shake(0.2f, 0.3f, 0.2f);
             if (source != null)
                 horizontalVelocity += (transform.position - source.transform.position).FlattenY().normalized * knockbackForce;
-        });
+            
+            GameplayManager.Instance.PlayerHurt(damage);
 
-        GameplayManager.Instance?.PlayerHurt(this, damage);
+            if (GameplayManager.Instance.playerLife <= 0)
+            {
+                Die();
+            }
+        });    
+    }
+    public void Die ()
+    {
+        gameObject.SetActive(false);
+        GameplayManager.Instance.PlayerDie();
     }
     public void OutOfBounds()
     {

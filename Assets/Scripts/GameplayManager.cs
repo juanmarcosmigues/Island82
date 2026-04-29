@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class GameplayManager : MonoBehaviour
@@ -6,14 +7,18 @@ public class GameplayManager : MonoBehaviour
 
     public SingletonGameObject singletonComponent;
     public int playerCurrency;
+    public int playerMaxLife;
+    public int playerLife;
     public float runTime;
 
     public event System.Action<int> OnAddCoins;
-    public event System.Action<Player, int> OnPlayerHurt;
-
+    public event System.Action<int> OnPlayerHurt;
+    public event System.Action OnPlayerDie;
     private void Awake()
     {
         if (singletonComponent.queuedToBeDestroyed) return;
+
+        playerLife = playerMaxLife;
 
         Instance = this;
     }
@@ -21,10 +26,49 @@ public class GameplayManager : MonoBehaviour
     {
         return Mathf.FloorToInt(runTime);
     }
-    public void PlayerHurt(Player player, int damage)
+    public void PlayerHurt(int damage)
     {
-        OnPlayerHurt?.Invoke(player, damage);
-    }    
+        playerLife = playerLife - damage;
+        OnPlayerHurt?.Invoke(damage);
+    }
+    public void PlayerDie ()
+    {
+        playerLife = 0;
+        OnPlayerDie?.Invoke();
+
+        StartCoroutine(Sequence());
+
+        IEnumerator Sequence ()
+        {
+            if (EnemyHand.Instance != null && EnemyHand.Instance.Grabbing)
+            {
+                yield break;
+            }
+
+            yield return new WaitForSeconds(3f);
+
+            GameOver();
+        }
+    }
+    public void GameOver ()
+    {
+        SceneTransitioner.ReloadScene(1, 1, 1);
+    }
+    public void VoidOut ()
+    {
+        SceneTransitioner.ReloadScene(1, 1, 1);
+    }
+    public void HandEndGrab()
+    {
+        if (playerLife > 0)
+        {
+            VoidOut();
+        }
+        else
+        {
+            GameOver();
+        }
+    }
     public void AddCoins (int amount)
     {
         playerCurrency += amount;

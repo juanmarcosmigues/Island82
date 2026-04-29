@@ -9,6 +9,8 @@ public class EnemyHand : MonoBehaviour
     private const float TO_GRAB_TIME = 0.4f;
     private const float MAX_LIVE_TIME = 25f;
 
+    public static EnemyHand Instance {  get; private set; }
+
     public GameObject hand;
     public Mesh meshHandRest;
     public Mesh meshHandGrab;
@@ -23,6 +25,8 @@ public class EnemyHand : MonoBehaviour
     public float catchRadius;
     public LayerMask solidMask;
 
+    public bool Grabbing => grabbing;
+
     private bool active;
     private bool grabbing;
     private Player player;
@@ -34,6 +38,10 @@ public class EnemyHand : MonoBehaviour
     private Timestamp timerTrySpawn;
     private float toGrabTime;
 
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Start()
     {
         player = Player.Instance;
@@ -256,7 +264,7 @@ public class EnemyHand : MonoBehaviour
                 yield return null;
             }
 
-            SceneTransitioner.ReloadScene(1,1,1);
+            GameplayManager.Instance.HandEndGrab();
         }
     }
     public void Leave ()
