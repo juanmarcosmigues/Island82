@@ -28,19 +28,9 @@ public class UIDialogueBox : MonoBehaviour, IInteractable
     public bool Writing => currentText.Length < goalBody.Length;
     public bool HasEnded => steps.Count == 0 && !gameObject.activeSelf;
 
-    private void Awake()
-    {
-        SingletonGameObject parent = GetComponentInParent<SingletonGameObject>();
-        if (parent != null )
-        {
-            if (parent.queuedToBeDestroyed)
-                return;
-        }
+    public static void SetInstance(UIDialogueBox instance) =>
+        Instance = instance;
 
-        Instance = this;
-
-        gameObject.SetActive(false);
-    }
     private void OnEnable()
     {
         //uiInput.GetButton("ButtonSouth").onPressedDown += PressNext;

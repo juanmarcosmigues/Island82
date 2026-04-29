@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[System.Serializable]
 public class InputButton
 {
     public string name;
@@ -71,6 +72,7 @@ public class InputButton
     }
 }
 
+[System.Serializable]
 public class InputAxisAsButton : InputButton
 {
     public enum Direction
@@ -81,7 +83,7 @@ public class InputAxisAsButton : InputButton
     }
 
     public float threshold = 0.5f;          // magnitude required to "press"
-    public float initialRepeatDelay = 2f;   // time held before auto-repeat starts
+    public float initialRepeatDelay = 0.5f;   // time held before auto-repeat starts
     public float repeatInterval = 0.4f;     // interval between auto-repeats
 
     public Vector2 axisValue { get; private set; }

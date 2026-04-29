@@ -12,15 +12,9 @@ public class SceneControllerGameOver : SceneController
 
     IEnumerator StartCutscene ()
     {
-        Player.Instance.input.inputEnabled = false;
+        UIHud.Instance.gameObject.SetActive(false);
+        UIGameOver.Instance.Show();
 
-        yield return new WaitForSeconds(1);
-
-        UIDialogueBox.Instance.Show(
-            (header: "Maca:", body: "Taru are you coming?"),
-            (header: "Maca:", body: "Ronnie made cookies, I’ll save you some. Meet us at the watchtower.")
-            );
-
-        UIHud.Instance.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1);     
     }
 }

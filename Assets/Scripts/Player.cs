@@ -442,6 +442,7 @@ public class Player : MonoBehaviour, IDynamicObject
     public void GetHit(GameObject source, int damage, Weight weight, string tag, bool knockback = true, bool ignoreInvulnerable = false)
     {
         if (Invulnerable && !ignoreInvulnerable) { return; }
+        if (GameplayManager.Instance.playerLife <= 0f) return;
 
         float knockbackForce = SPEED_KNOCKBACK;
         knockbackForce *= weight switch

@@ -12,17 +12,9 @@ public class UIHud : MonoBehaviour
     private int hours, minutes, seconds;
     private string clockDots = ":";
 
-    private void Awake()
-    {
-        SingletonGameObject parent = GetComponentInParent<SingletonGameObject>();
-        if (parent != null)
-        {
-            if (parent.queuedToBeDestroyed)
-                return;
-        }
+    public static void SetInstance (UIHud instance) =>
+        Instance = instance;
 
-        Instance = this;
-    }
     private void Start()
     {
         GameplayManager.Instance.OnAddCoins += AddCoins;

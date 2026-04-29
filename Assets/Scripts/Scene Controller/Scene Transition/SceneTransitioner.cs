@@ -24,6 +24,8 @@ public class SceneTransitioner : MonoBehaviour
 
     public static bool ReloadScene (float speedIn = 1f, float speedOut = 1f, float yieldTime = 0f) =>
         LoadScene(SceneManager.GetActiveScene().name, speedIn, speedOut, yieldTime);
+    public static bool ReloadScene(Color color, float speedIn = 1f, float speedOut = 1f, float yieldTime = 0f) =>
+        LoadScene(SceneManager.GetActiveScene().name, color, speedIn, speedOut, yieldTime);
     public static bool LoadScene(string name, Color transitionColor, float speedIn = 1f, float speedOut = 1f, float yieldTime = 0f)
     {
         if (Instance.loadingScene) return false;

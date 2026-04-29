@@ -52,11 +52,11 @@ public class GameplayManager : MonoBehaviour
     }
     public void GameOver ()
     {
-        SceneTransitioner.ReloadScene(1, 1, 1);
+        SceneTransitioner.LoadScene(GameDefinitions.SCENE_GAMEOVER, GameDefinitions.PickColor(0), 1, 1, 1);
     }
     public void VoidOut ()
     {
-        SceneTransitioner.ReloadScene(1, 1, 1);
+        SceneTransitioner.ReloadScene(GameDefinitions.PickColor(0), 1, 1, 1);
     }
     public void HandEndGrab()
     {

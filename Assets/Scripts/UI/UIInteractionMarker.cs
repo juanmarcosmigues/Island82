@@ -12,17 +12,11 @@ public class UIInteractionMarker : MonoBehaviour
     protected Vector3 worldTarget;
     protected bool showMarker;
 
+    public static void SetInstance(UIInteractionMarker instance) =>
+    Instance = instance;
+
     private void Awake()
     {
-        SingletonGameObject parent = GetComponentInParent<SingletonGameObject>();
-        if (parent != null)
-        {
-            if (parent.queuedToBeDestroyed)
-                return;
-        }
-
-        Instance = this;
-
         HideMarker();
     }
     public void ShowMarker (Vector3 worldPos)

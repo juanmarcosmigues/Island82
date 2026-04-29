@@ -1,21 +1,29 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(ObjectSounds))]
 public class UIOptionBox : MonoBehaviour
 {
+    public enum OptionType { Neutral, Positive, Negative }  
+
     public PlayerInput uiInput;
     [Space]
     public TextMeshProUGUI header;
     public TextMeshProUGUI optionA;
     public TextMeshProUGUI optionB;
     public RectTransform marker;
+    public float holdOnAnswerTime;
+
     [HideInInspector]
     public ObjectSounds sound;
 
     protected int currentSelected;
     protected System.Action onOptionA;
     protected System.Action onOptionB;
+    protected OptionType optionTypeA;
+    protected OptionType optionTypeB;
+    protected bool inputEnabled;
 
     private void Awake()
     {
@@ -23,14 +31,26 @@ public class UIOptionBox : MonoBehaviour
 
         uiInput.GetButton("ButtonSouth").onPressedDown += PressButton;
         uiInput.GetButton("ButtonWest").onPressedDown += PressButton;
-        uiInput.GetButton("Move").onPressedDown += PressButton;
+        uiInput.GetButton("Move").onPressedDown += PressAxis;
     }
     private void OnEnable()
     {
         SetCurrentSelected(0);
     }
+    private string GetSound (OptionType optionType)
+    {
+        return optionType switch
+        {
+            OptionType.Neutral => "NeutralOption",
+            OptionType.Positive => "PositiveOption",
+            OptionType.Negative => "NegativeOption",
+            _ => "NeutralOption"
+        };
+    }
     public void Show(string header, string optionA, string optionB, 
-        System.Action onOptionA, System.Action onOptionB)
+        System.Action onOptionA, System.Action onOptionB, 
+        OptionType optionTypeA = OptionType.Neutral,
+        OptionType optionTypeB = OptionType.Neutral)
     {
         gameObject.SetActive(true);
 
@@ -38,20 +58,43 @@ public class UIOptionBox : MonoBehaviour
 
         this.onOptionA = onOptionA;
         this.onOptionB = onOptionB;
+        this.optionTypeA = optionTypeA;
+        this.optionTypeB = optionTypeB;
+
+        marker.GetComponent<Blink>().enabled = false;
+        marker.gameObject.SetActive(true);
+
+        inputEnabled = true;
     }
     public void PressButton()
     {
-        if (currentSelected == 0)
+        if (!inputEnabled) return;
+
+        marker.GetComponent<Blink>().enabled = true;
+        inputEnabled = false;
+
+        sound.PlaySound(currentSelected == 0 ? GetSound(optionTypeA) : GetSound(optionTypeB));
+
+        StartCoroutine(_());
+
+        IEnumerator _ ()
         {
-            onOptionA();
-        }
-        else
-        {
-            onOptionB();
+            yield return new WaitForSeconds(holdOnAnswerTime);
+
+            if (currentSelected == 0)
+            {
+                onOptionA();
+            }
+            else
+            {
+                onOptionB();
+            }
         }
     }
     public void PressAxis ()
     {
+        if (!inputEnabled) return;
+
         var dir = (uiInput.GetButton("Move") as InputAxisAsButton).currentDirection;
         Move(dir);
     }
@@ -77,6 +120,8 @@ public class UIOptionBox : MonoBehaviour
             selected;
 
         SetCurrentSelected(selected);
+
+        sound.PlaySound("Move");
     }
     public void SetCurrentSelected (int selected)
     {
@@ -90,4 +135,5 @@ public class UIOptionBox : MonoBehaviour
         this.optionA.text = optionA;
         this.optionB.text = optionB;
     }
+    
 }
