@@ -40,4 +40,6 @@ public static class GameDefinitions
         new Color32(252, 255, 142, 255), // 15  (was  3)
     };
     public static Color PickColor(int index) => Colors[index];
+
+    public const int PLAYER_MAX_LIFE = 5;
 }

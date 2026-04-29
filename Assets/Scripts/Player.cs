@@ -216,6 +216,8 @@ public class Player : MonoBehaviour, IDynamicObject
 
             sounds.PlaySound("Jump");
 
+            GameplayManager.Instance?.PlayerJump();
+
             return;
         }
 
