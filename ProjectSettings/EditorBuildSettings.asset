@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/SceneTitleScreen.unity
+    guid: ca9c9f8ee318f25469740ca44a0bca5b
+  - enabled: 1
     path: Assets/Scenes/SceneGameOver.unity
     guid: 0598427fd2b72fb41ace4f5e27fbad8e
   - enabled: 1
@@ -14,9 +17,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SceneIsland.unity
     guid: e27620ef82d753a4f8c9f715cbb04689
-  - enabled: 1
-    path: Assets/Scripts/Scene Controller/SceneTransition.unity
-    guid: b73ba7539ed786b4ca6f8b01243b080f
   - enabled: 1
     path: Assets/Scenes/SceneTowerRoom01.unity
     guid: 3cc9b5064858f0241bd5db6b13996f41
@@ -29,5 +29,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SceneTowerRoom_05.unity
     guid: faf74bf4e76bdf84aaff81945573a0c0
+  - enabled: 1
+    path: Assets/Scripts/Scene Controller/SceneTransition.unity
+    guid: b73ba7539ed786b4ca6f8b01243b080f
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

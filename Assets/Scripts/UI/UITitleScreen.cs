@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class UIGameOver : MonoBehaviour
+public class UITitleScreen : MonoBehaviour
 {
     public Camera uiCamera;
     public UIOptionBox optionBox;
@@ -11,23 +11,23 @@ public class UIGameOver : MonoBehaviour
         GameRender.AddOverlayCamera(uiCamera);
     }
 
-    private void OnDestroy()
-    {
-        GameRender.RemoveOverlayCamera(uiCamera);
-    }
+    //private void OnDestroy()
+    //{
+    //    GameRender.RemoveOverlayCamera(uiCamera);
+    //}
 
     public void Show ()
     {
         gameObject.SetActive(true);
-        optionBox.Show("Continue?", "Yes", "No", Continue, GoToMainMenu, 
+        optionBox.Show("Continue?", "Yes", "No", Continue, NewGame, 
             UIOptionBox.OptionType.Positive, UIOptionBox.OptionType.Negative);
     }
     public void Continue ()
     {
 
     }
-    public void GoToMainMenu ()
+    public void NewGame ()
     {
-        GameplayManager.Instance.GoToMainMenu();
+
     }
 }

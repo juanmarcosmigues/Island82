@@ -82,9 +82,10 @@ public class GameplayManager : MonoBehaviour
         playerCurrency += amount;
         OnAddCoins?.Invoke(amount);
     }
-    void Update()
+
+    public void GoToMainMenu()
     {
-        runTime += Time.deltaTime;
+        SceneTransitioner.LoadScene(GameDefinitions.SCENE_TITLESCREEN, 1, 1, 1);
     }
     public void SaveGame (string savePoint)
     {
@@ -119,4 +120,5 @@ public class GameplayManager : MonoBehaviour
 
         return d;
     }
+
 }

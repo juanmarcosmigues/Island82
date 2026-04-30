@@ -28,7 +28,9 @@ public class UIOptionBox : MonoBehaviour
     private void Awake()
     {
         sound = GetComponent<ObjectSounds>();
-
+    }
+    private void Start()
+    {
         uiInput.GetButton("ButtonSouth").onPressedDown += PressButton;
         uiInput.GetButton("ButtonWest").onPressedDown += PressButton;
         uiInput.GetButton("Move").onPressedDown += PressAxis;

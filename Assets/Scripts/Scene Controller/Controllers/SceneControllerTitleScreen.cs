@@ -1,9 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
-public class SceneControllerGameOver : SceneController
+public class SceneControllerTitleScreen : SceneController
 {
-    public UIGameOver gameOver;
+    public UITitleScreen titleScreen;
     public override void OnSceneStart(string fromScene = "")
     {
         base.OnSceneStart(fromScene);
@@ -13,7 +13,7 @@ public class SceneControllerGameOver : SceneController
 
     IEnumerator StartCutscene ()
     {
-        gameOver.Show();
+        titleScreen.Show();
 
         yield return new WaitForSeconds(1);     
     }

@@ -20,6 +20,8 @@ public class UIHud : MonoBehaviour
         GameplayManager.Instance.OnAddCoins += AddCoins;
         GameplayManager.Instance.OnPlayerHurt += PlayerHurt;
         GameplayManager.Instance.OnPlayerDie += PlayerDie;
+
+        UpdateAllElements();
     }
     private void OnDestroy()
     {
@@ -42,16 +44,29 @@ public class UIHud : MonoBehaviour
     }
     private void AddCoins (int amount)
     {
-        tmpCoins.text = GameplayManager.Instance.playerCurrency.ToString("000");
+        UpdateLums();
     }
     private void PlayerHurt(int damage) 
     {
-        for (int i = 0; i < lifePoints.Length; i++)
-            lifePoints[i].SetActive(i < GameplayManager.Instance.playerLife) ;
+        UpdateLife();
     }
     private void PlayerDie ()
     {
         for (int i = 0; i < lifePoints.Length; i++)
             lifePoints[i].SetActive(false);
+    }
+    public void UpdateAllElements ()
+    {
+        UpdateLife ();
+        UpdateLums ();
+    }
+    public void UpdateLife ()
+    {
+        for (int i = 0; i < lifePoints.Length; i++)
+            lifePoints[i].SetActive(i < GameplayManager.Instance.playerLife);
+    }
+    public void UpdateLums ()
+    {
+        tmpCoins.text = GameplayManager.Instance.playerCurrency.ToString("000");
     }
 }

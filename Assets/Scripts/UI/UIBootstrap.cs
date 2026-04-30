@@ -1,12 +1,12 @@
 using UnityEngine;
 
-[DefaultExecutionOrder(-1)]
+[DefaultExecutionOrder(GameDefinitions.EXECUTION_ORDER_SYSTEM)]
 public class UIBootstrap : MonoBehaviour
 {
     [SerializeField] private UIHud hud;
     [SerializeField] private UIDialogueBox dialogueBox;
     [SerializeField] private UIInteractionMarker interactionMarker;
-    [SerializeField] private UIGameOver gameOver;
+    [SerializeField] private Camera uiCamera;
 
     private void Awake()
     {
@@ -20,6 +20,15 @@ public class UIBootstrap : MonoBehaviour
         UIHud.SetInstance(hud);
         UIDialogueBox.SetInstance(dialogueBox);
         UIInteractionMarker.SetInstance(interactionMarker);
-        UIGameOver.SetInstance(gameOver);
     }
+
+    private void Start()
+    {
+        GameRender.AddOverlayCamera(uiCamera);
+    }
+
+    //private void OnDestroy()
+    //{
+    //    GameRender.RemoveOverlayCamera(uiCamera);
+    //}
 }
