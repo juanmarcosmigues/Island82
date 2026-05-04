@@ -21,9 +21,6 @@ public class GameplayManager : MonoBehaviour
     {
         if (singletonComponent.queuedToBeDestroyed) return;
 
-        if (lastSave == null || lastSave.IsEmpty())
-            LoadGame();
-
         Instance = this;
     }
     public int GetRuntime()
@@ -87,14 +84,14 @@ public class GameplayManager : MonoBehaviour
     {
         SceneTransitioner.LoadScene(GameDefinitions.SCENE_TITLESCREEN, 1, 1, 1);
     }
-    public void SaveGame (string savePoint)
+    public void SaveGame (string savePoint, int saveFile)
     {
         SaveFile.Data d = new SaveFile.Data(savePoint, playerJumps, playerLife, playerCurrency);
-        SaveFile.Save(d);
+        SaveFile.Save(d, saveFile);
     }
-    public SaveFile.Data LoadGame ()
+    public SaveFile.Data LoadGame (int saveFile)
     {
-        SaveFile.Data d = SaveFile.Load();
+        SaveFile.Data d = SaveFile.Load(saveFile);
 
         if (d.IsEmpty())
         {

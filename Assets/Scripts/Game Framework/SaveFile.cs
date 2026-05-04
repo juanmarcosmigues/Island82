@@ -36,23 +36,23 @@ public static class SaveFile
         }
     }
 
-    public static Data Load ()
+    public static Data Load (int saveFile)
     {
         Data data = new Data();
 
-        data.savePoint = PlayerPrefs.GetString(KEY_SAVEPOINT, "");
+        data.savePoint = PlayerPrefs.GetString(saveFile + "_" + KEY_SAVEPOINT, "");
 
-        data.jumps = PlayerPrefs.GetInt(KEY_JUMPAMOUNT, -1);
-        data.life = PlayerPrefs.GetInt(KEY_PLAYERLIFE, -1);
-        data.lums = PlayerPrefs.GetInt(KEY_LUMS, -1);
+        data.jumps = PlayerPrefs.GetInt(saveFile + "_" + KEY_JUMPAMOUNT, -1);
+        data.life = PlayerPrefs.GetInt(saveFile + "_" + KEY_PLAYERLIFE, -1);
+        data.lums = PlayerPrefs.GetInt(saveFile + "_" + KEY_LUMS, -1);
 
         return data;
     }
-    public static void Save (Data data) 
+    public static void Save (Data data, int saveFile) 
     {
-        PlayerPrefs.SetString(KEY_SAVEPOINT, data.savePoint);
-        PlayerPrefs.SetInt(KEY_JUMPAMOUNT, data.jumps);
-        PlayerPrefs.SetInt(KEY_PLAYERLIFE, data.life);
-        PlayerPrefs.SetInt(KEY_LUMS, data.lums);
+        PlayerPrefs.SetString(saveFile + "_" + KEY_SAVEPOINT, data.savePoint);
+        PlayerPrefs.SetInt(saveFile + "_" + KEY_JUMPAMOUNT, data.jumps);
+        PlayerPrefs.SetInt(saveFile + "_" + KEY_PLAYERLIFE, data.life);
+        PlayerPrefs.SetInt(saveFile + "_" + KEY_LUMS, data.lums);
     }
 }

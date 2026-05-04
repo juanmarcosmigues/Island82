@@ -24,10 +24,10 @@ public class UITitleScreen : MonoBehaviour
     }
     public void Continue ()
     {
-
+        GameplayManager.Instance.LoadGame(0);
     }
     public void NewGame ()
     {
-
+        GameplayManager.Instance.NewGame();
     }
 }
