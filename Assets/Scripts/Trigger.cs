@@ -1,4 +1,3 @@
-using UnityEditor;
 using UnityEngine;
 
 public class Trigger : MonoBehaviour
@@ -8,6 +7,8 @@ public class Trigger : MonoBehaviour
     public BoxCollider trigger;
     public GameObject[] targets;
     public Color color;
+
+    public event System.Action onTriggerEnter;
 
     private ITrigger[] targetsTriggers;
 
@@ -25,6 +26,7 @@ public class Trigger : MonoBehaviour
             if (other.tag != targetTag) return;
 
         targetsTriggers.ForEach(t => t.Trigger());
+        onTriggerEnter?.Invoke();
 
         if (consume)
             gameObject.SetActive(false);

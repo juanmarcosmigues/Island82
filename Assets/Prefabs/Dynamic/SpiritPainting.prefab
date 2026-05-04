@@ -41,6 +41,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1138183034922577299}
+  - component: {fileID: 2669850587033148026}
   m_Layer: 0
   m_Name: SpiritPainting
   m_TagString: Untagged
@@ -56,7 +57,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2717166373835469583}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0.00000010430811}
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
   m_LocalPosition: {x: 13.51162, y: 9.75, z: 2.4919596}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -65,6 +66,19 @@ Transform:
   - {fileID: 871711652727596076}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+--- !u!114 &2669850587033148026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2717166373835469583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff6ceaa1503d208408308c989834e152, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpiritPainting
+  trigger: {fileID: 2465160498700508476}
 --- !u!1 &3721495270628599608
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,8 +89,8 @@ GameObject:
   m_Component:
   - component: {fileID: 871711652727596076}
   - component: {fileID: 3970474250751647863}
-  - component: {fileID: 2502107568344650028}
-  m_Layer: 0
+  - component: {fileID: 2465160498700508476}
+  m_Layer: 10
   m_Name: TriggerSpiritMode
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,8 +106,8 @@ Transform:
   m_GameObject: {fileID: 3721495270628599608}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 1, z: -0, w: 0.00000010430811}
-  m_LocalPosition: {x: -0, y: 0, z: -0.39}
-  m_LocalScale: {x: 1, y: 2.244854, z: 0.75582075}
+  m_LocalPosition: {x: 0, y: 0, z: -0.39}
+  m_LocalScale: {x: 1, y: 2.244854, z: 0.6141119}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1138183034922577299}
@@ -119,7 +133,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2502107568344650028
+--- !u!114 &2465160498700508476
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -131,11 +145,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69bcb9c0b3cf6e64994c115e3c4718e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Trigger
-  consume: 1
+  consume: 0
   targetTag: Player
   trigger: {fileID: 3970474250751647863}
   targets: []
-  color: {r: 0.8784314, g: 0.29909825, b: 0.23529412, a: 1}
+  color: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1001 &6355946684830496828
 PrefabInstance:
   m_ObjectHideFlags: 0
